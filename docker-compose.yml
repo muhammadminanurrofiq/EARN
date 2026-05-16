@@ -1,0 +1,94 @@
+version: '3.8'
+
+services:
+  # ══════════════════════════════════════════════
+  # 1. Database PostgreSQL
+  # ══════════════════════════════════════════════
+  db:
+    image: postgres:15-alpine
+    container_name: earn_db
+    restart: always
+    environment:
+      POSTGRES_USER: earn_user
+      POSTGRES_PASSWORD: earn_password
+      POSTGRES_DB: earn_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - earn_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U earn_user -d earn_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # ══════════════════════════════════════════════
+  # 2. MQTT Broker (Eclipse Mosquitto)
+  # ══════════════════════════════════════════════
+  mosquitto:
+    image: eclipse-mosquitto:2.0
+    container_name: earn_mosquitto
+    restart: always
+    ports:
+      - "1883:1883" # MQTT over TCP (Hardware / Backend Worker)
+      - "9001:9001" # MQTT over WebSockets (Browser Frontend)
+    volumes:
+      - ./mosquitto/config:/mosquitto/config
+      - ./mosquitto/data:/mosquitto/data
+      - ./mosquitto/log:/mosquitto/log
+    networks:
+      - earn_network
+    healthcheck:
+      test: ["CMD", "mosquitto_sub", "-t", "$$SYS/#", "-C", "1", "-i", "health_check", "-W", "3"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ══════════════════════════════════════════════
+  # 3. Backend Worker Node.js (MQTT + Prisma)
+  # ══════════════════════════════════════════════
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: earn_backend
+    restart: always
+    environment:
+      - DATABASE_URL=postgresql://earn_user:earn_password@db:5432/earn_db?schema=public
+      - MQTT_BROKER_URL=mqtt://mosquitto:1883
+    depends_on:
+      db:
+        condition: service_healthy
+      mosquitto:
+        condition: service_started
+    networks:
+      - earn_network
+
+  # ══════════════════════════════════════════════
+  # 4. Frontend Web SPA (Next.js)
+  # ══════════════════════════════════════════════
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: earn_frontend
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      # Browser mengakses WebSocket Mosquitto via localhost (dari sudut pandang user)
+      - NEXT_PUBLIC_MQTT_WS_URL=ws://localhost:9001
+    depends_on:
+      mosquitto:
+        condition: service_started
+    networks:
+      - earn_network
+
+volumes:
+  db_data:
+
+networks:
+  earn_network:
+    driver: bridge
