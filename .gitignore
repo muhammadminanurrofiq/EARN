@@ -1,6 +1,7 @@
 # Exclude folders specified by the user
 /stitch_project_earn_dashboard/
 /rules/
+/.agents/*
 
 # Exclude build artifacts and dependencies
 /EARN/frontend/node_modules/
