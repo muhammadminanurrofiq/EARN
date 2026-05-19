@@ -1,0 +1,20 @@
+{
+  "name": "earn-backend-worker",
+  "version": "1.0.0",
+  "description": "MQTT Worker for EARN Project",
+  "main": "src/worker.js",
+  "scripts": {
+    "start": "node src/worker.js",
+    "dev": "nodemon src/worker.js",
+    "db:migrate": "prisma migrate deploy && prisma generate",
+    "db:push": "prisma db push"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.14.0",
+    "mqtt": "^5.7.0"
+  },
+  "devDependencies": {
+    "prisma": "^5.14.0",
+    "nodemon": "^3.1.0"
+  }
+}

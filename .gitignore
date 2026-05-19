@@ -1,0 +1,15 @@
+# Exclude folders specified by the user
+/stitch_project_earn_dashboard/
+/rules/
+
+# Exclude build artifacts and dependencies
+/EARN/frontend/node_modules/
+/EARN/frontend/.next/
+/EARN/frontend/out/
+
+# Local env files
+.env*.local
+
+# OS files
+.DS_Store
+Thumbs.db

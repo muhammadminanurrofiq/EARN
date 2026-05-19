@@ -27,7 +27,7 @@ export default function LineChartRVM() {
             </feMerge>
           </filter>
         </defs>
-        <CartesianGrid strokeDasharray="3 3" stroke="hsla(215, 20%, 65%, 0.1)" vertical={false} />
+        <CartesianGrid strokeDasharray="3 3" stroke="var(--border-subtle)" vertical={false} />
         <XAxis 
           dataKey="time" 
           stroke="var(--text-tertiary)" 
@@ -52,10 +52,10 @@ export default function LineChartRVM() {
         <Line 
           type="monotone" 
           dataKey="botol" 
-          stroke="var(--accent-success)" 
+          stroke="var(--accent-primary)" 
           strokeWidth={3} 
-          dot={{ r: 3, fill: "var(--surface-primary)", stroke: "var(--accent-success)", strokeWidth: 2 }} 
-          activeDot={{ r: 5, fill: "var(--accent-success)", stroke: "#fff", strokeWidth: 2 }}
+          dot={{ r: 3, fill: "var(--surface-primary)", stroke: "var(--accent-primary)", strokeWidth: 2 }} 
+          activeDot={{ r: 5, fill: "var(--accent-primary)", stroke: "#fff", strokeWidth: 2 }}
           filter="url(#glow)"
         />
       </LineChart>

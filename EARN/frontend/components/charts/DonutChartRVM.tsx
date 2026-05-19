@@ -5,11 +5,11 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 
 // Exact data matching the image
 const data = [
-  { name: 'RVM-01 (Fakultas Teknik)', value: 620, color: '#22c55e' }, // Green
-  { name: 'RVM-02 (Kantin Center)', value: 360, color: '#3b82f6' }, // Blue
-  { name: 'RVM-03 (Perpustakaan)', value: 200, color: '#f59e0b' }, // Yellow/Orange
-  { name: 'RVM-04 (Fakultas Ekonomi)', value: 120, color: '#a855f7' }, // Purple
-  { name: 'RVM-05 (Student Center)', value: 0, color: '#06b6d4' }, // Cyan
+  { name: 'RVM-01 (Fakultas Teknik)', value: 620, color: '#4edea3' }, // Emerald (Accent Primary)
+  { name: 'RVM-02 (Kantin Center)', value: 360, color: '#95d3ba' }, // Forest Green (Accent Secondary)
+  { name: 'RVM-03 (Perpustakaan)', value: 200, color: '#a8cfbc' }, // Soft Mint (Accent Tertiary)
+  { name: 'RVM-04 (Fakultas Ekonomi)', value: 120, color: '#c4e5d4' }, // Light Mint
+  { name: 'RVM-05 (Student Center)', value: 0, color: '#dde4df' }, // Surface Text
 ];
 
 export default function DonutChartRVM() {

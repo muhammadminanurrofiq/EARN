@@ -1,0 +1,41 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+}
+
+model Users {
+  id_user    String      @id @default(uuid())
+  nama       String
+  email      String      @unique
+  password   String
+  total_poin Int         @default(0)
+  created_at DateTime    @default(now())
+  transaksi  Transaksi[]
+}
+
+model Mesin_RVM {
+  id_mesin           String      @id
+  lokasi             String
+  kapasitas_maks     Int
+  kapasitas_saat_ini Int         @default(0)
+  status_operasional String      @default("Aktif")
+  last_ping          DateTime    @default(now())
+  transaksi          Transaksi[]
+}
+
+model Transaksi {
+  id_transaksi String    @id @default(uuid())
+  id_user      String
+  id_mesin     String
+  jumlah_botol Int       @default(1)
+  jumlah_poin  Int
+  timestamp    DateTime  @default(now())
+
+  user         Users     @relation(fields: [id_user], references: [id_user])
+  mesin        Mesin_RVM @relation(fields: [id_mesin], references: [id_mesin])
+}

@@ -1,9 +1,15 @@
 import type { Metadata } from "next";
-import { Inter, JetBrains_Mono } from "next/font/google";
+import { Inter, JetBrains_Mono, Hanken_Grotesk } from "next/font/google";
 import "./globals.css";
 import MqttProvider from "@/components/MqttProvider";
 import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
+
+const hankenGrotesk = Hanken_Grotesk({
+  subsets: ["latin"],
+  variable: "--font-headline",
+  display: "swap",
+});
 
 const inter = Inter({
   subsets: ["latin"],
@@ -29,7 +35,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="id" className={`${inter.variable} ${jetbrainsMono.variable}`}>
+    <html lang="id" className={`${inter.variable} ${jetbrainsMono.variable} ${hankenGrotesk.variable}`}>
       <body className="antialiased bg-[color:var(--surface-primary)] text-[color:var(--text-primary)]">
         <MqttProvider>
           <div className="flex min-h-screen h-screen overflow-hidden">

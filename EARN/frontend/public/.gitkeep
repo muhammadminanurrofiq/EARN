@@ -1,0 +1,2 @@
+# Folder ini dibutuhkan oleh Docker multi-stage build
+# Next.js mengcopy folder public ke standalone output
