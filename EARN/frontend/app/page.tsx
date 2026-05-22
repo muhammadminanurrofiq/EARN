@@ -1,219 +1,451 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useMqtt } from '@/components/MqttProvider';
-import { ArrowUp, Activity, CheckCircle2, XCircle, AlertCircle, Droplet, Star, Users, Recycle, Cpu, MapPin } from 'lucide-react';
-import LineChartRVM from '@/components/charts/LineChartRVM';
-import DonutChartRVM from '@/components/charts/DonutChartRVM';
-import CameraFeed from '@/components/CameraFeed';
-import clsx from 'clsx';
+import Sidebar from '@/components/Sidebar';
+import Header from '@/components/Header';
 
-export default function AdminDashboard() {
-  const { isConnected, latestEvent, globalKPI } = useMqtt();
-  const [logs, setLogs] = useState<any[]>([]);
-  const [selectedMachine, setSelectedMachine] = useState<string>('RVM-01');
+// ── Types ──────────────────────────────────────────────────────────────────────
+type LogType = 'success' | 'error' | 'info';
 
-  useEffect(() => {
-    if (latestEvent) {
-      setLogs(prev => [latestEvent, ...prev].slice(0, 5));
+interface ActivityLog {
+  type: LogType;
+  title: string;
+  desc: string;
+  time: string;
+  poin: string;
+  avatar: string;
+}
+
+interface MesinStatus {
+  id: string;
+  lokasi: string;
+  status: 'Online' | 'Penuh' | 'Maintenance';
+  kapasitas: number;
+  isi: number;
+  maks: number;
+  kondisi: string;
+  strokeColor: string;
+}
+
+// ── Mock Data ─────────────────────────────────────────────────────────────────
+const mockLogs: ActivityLog[] = [
+  {
+    type: 'success',
+    title: 'Botol berhasil diterima',
+    desc: 'RVM-01 (Fakultas Teknik)',
+    time: '10:24:36',
+    poin: '+10 poin',
+    avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCwcJNG_iW9lNGdxVSSpwPKuzTHEaf_2pt_pu0N2J6oVxl6IZypBU8s6iBGEIqH_4nNEW5hddv8VhOtQc6KfIyzm0R5QkOpZsTZywupfzaR9kq73IkinlXnUIQH2bgva4NoqMTvmkcJBA4zIWTcuWRcZ317J9K-NK3TjqsCg_-BxwnRywiUIWovVGB1hmbBmsbGEZyCUC6ICRQDSg6ThJUlUFbgb5BsGYDqO253oGAc8FMPhXDrpud40xvMb2_ara71jWgJnIeGIDM',
+  },
+  {
+    type: 'info',
+    title: 'Poin diberikan ke pengguna',
+    desc: 'Salsabila Putri',
+    time: '10:24:36',
+    poin: '+10 poin',
+    avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCX2idl8g_pihtK3Fg8GuKth5KG0uawDSF-uKQdzH35hxBI0IoMztmTPypgxENPBUncojzBmZhTLpTCfGO4sRKatqtMLd-tHSeJWA42D_p4x94x-qg1fddeMC9JQsD1nrGigj7zgugxSTvL927bupFK6WqB6NA_yAdMg2Qrs51XWJ0jCoCFIW_qAIPOZTyqH771e7Ugtu2E1iGxj_2WtE-RT6IoTSfBfh8pKUVk5Vt1PM4Aj9E0JxXpCRDs0TKcpH5wIQbutI5vD_k',
+  },
+  {
+    type: 'error',
+    title: 'Botol tidak valid',
+    desc: 'RVM-02 (Kantin Center)',
+    time: '10:24:28',
+    poin: '+0 poin',
+    avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBLFkw3QhsTNJb-UoxhwcN6DuIhG58IfY0onHWYICvI2bjTlV3DBetwtrrx8BzzN3vqxHhnJ07SX1YfnhhSoe6EdKMIIjTX0hfHUBnD-tsTHTh2DmQMIYWYjvFsZfQLS2t-0l-lTFN69PJZrHzH58QCIeOn0e5m6begBpfC2XtKD2FsW8Men2TGMh7UI-AR6aBOlvETOHxfmVKaUEh_GOMtrEWJDoVzSru7Cd8P9HtSDGWQngtmCipd6OMSYBOh9jWdGAZjGMKnFyw',
+  },
+];
+
+const mesinStatusList: MesinStatus[] = [
+  { id: 'RVM-01', lokasi: 'Fakultas Teknik', status: 'Online', kapasitas: 78, isi: 620, maks: 800, kondisi: 'Normal', strokeColor: '#4edea3' },
+  { id: 'RVM-02', lokasi: 'Kantin Center', status: 'Online', kapasitas: 45, isi: 360, maks: 800, kondisi: 'Normal', strokeColor: '#95d3ba' },
+  { id: 'RVM-03', lokasi: 'Perpustakaan', status: 'Penuh', kapasitas: 100, isi: 800, maks: 800, kondisi: 'Penuh', strokeColor: '#ffb4ab' },
+  { id: 'RVM-04', lokasi: 'Food Court', status: 'Maintenance', kapasitas: 0, isi: 0, maks: 800, kondisi: 'Maintenance', strokeColor: '#fb923c' },
+];
+
+// ── Sub-Components ─────────────────────────────────────────────────────────────
+
+function StatCard({ label, value, unit, trend, icon }: {
+  label: string; value: string; unit: string; trend: string; icon: string;
+}) {
+  const panelRef = useRef<HTMLDivElement>(null);
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = panelRef.current!.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    panelRef.current!.style.background = `radial-gradient(circle at ${x}px ${y}px, rgba(78, 222, 163, 0.05) 0%, rgba(26, 33, 30, 0.4) 50%)`;
+  };
+
+  const handleMouseLeave = () => {
+    if (panelRef.current) panelRef.current.style.background = 'rgba(26, 33, 30, 0.4)';
+  };
+
+  return (
+    <div
+      ref={panelRef}
+      className="glass-panel p-md rounded-2xl relative overflow-hidden hover:border-primary/20 transition-all group"
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+    >
+      <div className="absolute -right-4 -bottom-4 opacity-10 group-hover:opacity-20 transition-opacity">
+        <span className="material-symbols-outlined text-[80px] text-primary">{icon}</span>
+      </div>
+      <p className="text-xs text-on-surface-variant uppercase font-label tracking-wider mb-sm">{label}</p>
+      <div className="flex items-baseline gap-xs mb-xs">
+        <h4 className="text-2xl font-headline font-bold text-primary">{value}</h4>
+        <span className="text-xs text-on-surface-variant">{unit}</span>
+      </div>
+      <div className="flex items-center gap-xs text-[10px] text-primary-fixed-dim font-bold">
+        <span className="material-symbols-outlined text-xs">arrow_upward</span>
+        <span>{trend}</span>
+      </div>
+    </div>
+  );
+}
+
+function LineChart() {
+  return (
+    <div className="relative h-64 w-full flex items-end">
+      {/* Gridlines */}
+      <div className="absolute inset-0 flex flex-col justify-between text-[10px] text-on-surface-variant opacity-40">
+        {['1.5K', '1.2K', '900', '600', '300', '0'].map((label) => (
+          <div key={label} className={`w-full border-t ${label === '0' ? 'border-outline-variant' : 'border-dashed border-outline-variant/50'} flex justify-between items-start`}>
+            <span>{label}</span>
+          </div>
+        ))}
+      </div>
+      {/* SVG Chart */}
+      <svg className="w-full h-full relative z-10" viewBox="0 0 100 100" preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="chartGradient" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stopColor="#4edea3" />
+            <stop offset="100%" stopColor="transparent" />
+          </linearGradient>
+        </defs>
+        <path
+          d="M0,80 Q10,75 20,70 T40,40 T60,65 T80,30 T100,20"
+          fill="none"
+          stroke="#4edea3"
+          strokeWidth="2"
+          className="chart-line-glow"
+        />
+        <path
+          d="M0,80 Q10,75 20,70 T40,40 T60,65 T80,30 T100,20 L100,100 L0,100 Z"
+          fill="url(#chartGradient)"
+          opacity="0.1"
+        />
+        <circle cx="40" cy="40" r="3" fill="#ffffff" className="pulse-emerald" />
+      </svg>
+      {/* Tooltip */}
+      <div className="absolute top-[30%] left-[38%] bg-surface-container-highest border border-primary/20 px-sm py-xs rounded-lg shadow-xl z-20">
+        <p className="text-[8px] text-on-surface-variant font-bold uppercase font-label">10:00</p>
+        <p className="text-[10px] text-primary"><span className="font-bold">1.024</span> botol</p>
+      </div>
+    </div>
+  );
+}
+
+function DonutChart() {
+  const donutData = [
+    { label: 'RVM-01 (Fakultas Teknik)', botol: 620, persen: '49.7%', color: '#10b981', offset: 0 },
+    { label: 'RVM-02 (Kantin Center)', botol: 360, persen: '28.9%', color: '#84cc16', offset: -49.7 },
+    { label: 'RVM-03 (Perpustakaan)', botol: 200, persen: '16.1%', color: '#059669', offset: -78.6 },
+  ];
+
+  return (
+    <div className="glass-panel p-md rounded-2xl flex flex-col" style={{ background: 'rgba(26, 33, 30, 0.4)' }}>
+      <div className="flex justify-between items-center mb-md">
+        <h5 className="font-label text-sm text-primary">Distribusi Pengumpulan</h5>
+        <div className="flex items-center gap-xs px-sm py-1 bg-surface-container rounded-lg border border-outline-variant/30 text-[10px] cursor-pointer hover:border-primary/40 transition-all">
+          <span>Hari Ini</span>
+          <span className="material-symbols-outlined text-xs">expand_more</span>
+        </div>
+      </div>
+
+      <div className="flex-1 flex flex-col items-center justify-center py-md">
+        <div className="relative w-40 h-40">
+          <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
+            <circle cx="18" cy="18" r="15.9" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="4" />
+            {donutData.map((d, i) => (
+              <circle
+                key={i}
+                cx="18" cy="18" r="15.9"
+                fill="none"
+                stroke={d.color}
+                strokeWidth="4"
+                strokeLinecap="round"
+                strokeDasharray={`${parseFloat(d.persen)} 100`}
+                strokeDashoffset={d.offset}
+              />
+            ))}
+          </svg>
+          <div className="absolute inset-0 flex flex-col items-center justify-center">
+            <p className="text-[8px] text-on-surface-variant uppercase font-bold font-label">Total</p>
+            <p className="text-2xl font-headline font-bold text-primary leading-none">1.247</p>
+            <p className="text-[8px] text-on-surface-variant">botol</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-auto space-y-2">
+        <div className="flex justify-between text-[10px] text-on-surface-variant border-b border-outline-variant/30 pb-1 opacity-50 uppercase font-bold font-label">
+          <span>Mesin</span>
+          <div className="flex gap-4">
+            <span>Botol</span>
+            <span>Persentase</span>
+          </div>
+        </div>
+        {donutData.map((d, i) => (
+          <div key={i} className="flex justify-between items-center text-[11px]">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full" style={{ backgroundColor: d.color }} />
+              <span className="text-on-surface">
+                {d.label.split(' ')[0]} <span className="opacity-50">({d.label.split('(')[1]?.replace(')', '') ?? ''})</span>
+              </span>
+            </div>
+            <div className="flex gap-10">
+              <span>{d.botol}</span>
+              <span className="font-bold" style={{ color: d.color }}>{d.persen}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ActivityFeed({ logs }: { logs: ActivityLog[] }) {
+  const iconMap: Record<LogType, { icon: string; bgClass: string; textClass: string }> = {
+    success: { icon: 'arrow_downward', bgClass: 'bg-primary/20', textClass: 'text-primary' },
+    info: { icon: 'person', bgClass: 'bg-secondary/20', textClass: 'text-secondary' },
+    error: { icon: 'close', bgClass: 'bg-error/20', textClass: 'text-error' },
+  };
+
+  return (
+    <div className="glass-panel p-md rounded-2xl flex flex-col" style={{ background: 'rgba(26, 33, 30, 0.4)' }}>
+      <div className="flex justify-between items-center mb-md">
+        <h5 className="font-label text-xs text-primary uppercase tracking-wider">Aktivitas Terbaru</h5>
+        <button className="text-[10px] text-primary font-bold hover:underline">Lihat Semua</button>
+      </div>
+      <div className="space-y-sm overflow-y-auto max-h-[400px] pr-2">
+        {logs.map((log, i) => {
+          const { icon, bgClass, textClass } = iconMap[log.type];
+          return (
+            <div key={i} className="flex items-center gap-md p-sm rounded-xl hover:bg-primary/5 transition-colors group">
+              <div className={`w-8 h-8 rounded-full ${bgClass} flex items-center justify-center ${textClass}`}>
+                <span className="material-symbols-outlined text-sm">{icon}</span>
+              </div>
+              <img
+                alt="user"
+                className="w-8 h-8 rounded-full border border-outline-variant/30"
+                src={log.avatar}
+              />
+              <div className="flex-1">
+                <p className="text-xs font-bold text-on-surface">{log.title}</p>
+                <p className="text-[10px] text-on-surface-variant">{log.desc}</p>
+              </div>
+              <div className="text-right">
+                <p className="text-[10px] text-on-surface-variant">{log.time}</p>
+                <p className={`text-[10px] font-bold ${log.type === 'error' ? 'text-error' : 'text-primary'}`}>
+                  {log.poin}
+                </p>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function MesinTable({ mesinList }: { mesinList: MesinStatus[] }) {
+  const getStatusBadge = (status: MesinStatus['status']) => {
+    switch (status) {
+      case 'Online': return <span className="px-2 py-0.5 bg-primary-container/20 text-primary-fixed rounded text-[10px]">Online</span>;
+      case 'Penuh': return <span className="px-2 py-0.5 bg-error/20 text-error rounded text-[10px]">Penuh</span>;
+      case 'Maintenance': return <span className="px-2 py-0.5 bg-orange-500/20 text-orange-400 rounded text-[10px]">Maintenance</span>;
     }
-  }, [latestEvent]);
+  };
 
-  // Exact mock data
-  const mockLogs = [
-    { type: 'success', title: 'Botol berhasil diterima', desc: 'RVM-01 (Fakultas Teknik)', time: '10:24:36', poin: '+10 poin', initial: 'S', user: 'Salsabila Putri' },
-    { type: 'info', title: 'Poin diberikan ke pengguna', desc: 'Salsabila Putri', time: '10:24:36', poin: '+10 poin', initial: 'S', user: 'Salsabila Putri' },
-    { type: 'error', title: 'Botol tidak valid', desc: 'RVM-02 (Kantin Center)', time: '10:24:28', poin: '+0 poin', initial: 'B', user: 'Budi Santoso' },
-    { type: 'warning', title: 'Pintu mesin dibuka', desc: 'RVM-01 (Fakultas Teknik)', time: '10:24:18', poin: '-', initial: 'A', user: 'Admin' },
-  ];
+  const getKondisiColor = (status: MesinStatus['status']) => {
+    switch (status) {
+      case 'Online': return 'text-primary';
+      case 'Penuh': return 'text-error';
+      case 'Maintenance': return 'text-orange-400';
+    }
+  };
 
-  const mesinStatus = [
-    { id: 'RVM-01', lokasi: 'Fakultas Teknik', status: 'Online', kapasitas: 78, isi: 620, maks: 800, kondisi: 'Normal' },
-    { id: 'RVM-02', lokasi: 'Kantin Center', status: 'Online', kapasitas: 45, isi: 360, maks: 800, kondisi: 'Normal' },
-    { id: 'RVM-03', lokasi: 'Perpustakaan', status: 'Penuh', kapasitas: 100, isi: 800, maks: 800, kondisi: 'Penuh' },
-    { id: 'RVM-04', lokasi: 'Fakultas Ekonomi', status: 'Online', kapasitas: 30, isi: 240, maks: 800, kondisi: 'Normal' },
-  ];
-
-  const renderIcon = (type: string) => {
-    switch (type) {
-      case 'success': return <div className="w-8 h-8 rounded-full bg-[color:rgba(78,222,163,0.1)] text-[color:var(--accent-primary)] flex items-center justify-center border border-[color:rgba(78,222,163,0.2)]"><ArrowUp className="w-4 h-4 transform rotate-180" /></div>;
-      case 'info': return <div className="w-8 h-8 rounded-full bg-[color:rgba(149,211,186,0.1)] text-[color:var(--accent-secondary)] flex items-center justify-center border border-[color:rgba(149,211,186,0.2)]"><CheckCircle2 className="w-4 h-4" /></div>;
-      case 'error': return <div className="w-8 h-8 rounded-full bg-[color:rgba(255,180,171,0.1)] text-[color:var(--accent-danger)] flex items-center justify-center border border-[color:rgba(255,180,171,0.2)]"><XCircle className="w-4 h-4" /></div>;
-      case 'warning': return <div className="w-8 h-8 rounded-full bg-[color:rgba(176,240,214,0.1)] text-[color:var(--accent-warning)] flex items-center justify-center border border-[color:rgba(176,240,214,0.2)]"><AlertCircle className="w-4 h-4" /></div>;
-      default: return null;
+  const getWaveColor = (status: MesinStatus['status']) => {
+    switch (status) {
+      case 'Online': return '#4edea3';
+      case 'Penuh': return '#ffb4ab';
+      case 'Maintenance': return '#fb923c';
     }
   };
 
   return (
-    <main className="flex-1 p-6 flex flex-col gap-6 overflow-y-auto custom-scrollbar h-[calc(100vh-5rem)]">
-      
-      {/* KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 flex-shrink-0">
-        <div className="card-ui relative overflow-hidden group">
-          <div className="absolute right-0 top-0 w-32 h-32 bg-[color:var(--accent-primary)] opacity-5 rounded-full blur-3xl group-hover:opacity-10 transition-opacity"></div>
-          <div className="relative z-10 flex justify-between items-center">
-            <div>
-              <p className="text-xs font-medium text-[color:var(--text-tertiary)] mb-1">Total Botol Terkumpul</p>
-              <h3 className="text-2xl font-bold font-mono text-[color:var(--text-primary)] mb-1">1.247 <span className="text-xs font-sans font-normal text-[color:var(--text-secondary)]">botol</span></h3>
-              <p className="text-[10px] font-medium text-[color:var(--accent-primary)] flex items-center gap-1">
-                <ArrowUp className="w-3 h-3" /> 18.4% <span className="text-[color:var(--text-tertiary)] font-normal">dari kemarin</span>
-              </p>
-            </div>
-            <div className="w-12 h-12 rounded-xl bg-[color:rgba(78,222,163,0.1)] flex items-center justify-center border border-[color:rgba(78,222,163,0.2)]">
-              <Droplet className="w-6 h-6 text-[color:var(--accent-primary)]" />
-            </div>
-          </div>
-        </div>
-
-        
-
-        <div className="card-ui relative overflow-hidden group">
-          <div className="absolute right-0 top-0 w-32 h-32 bg-[color:var(--accent-tertiary)] opacity-5 rounded-full blur-3xl group-hover:opacity-10 transition-opacity"></div>
-          <div className="relative z-10 flex justify-between items-center">
-            <div>
-              <p className="text-xs font-medium text-[color:var(--text-tertiary)] mb-1">Pengguna Aktif (Daily)</p>
-              <h3 className="text-2xl font-bold font-mono text-[color:var(--text-primary)] mb-1">342 <span className="text-xs font-sans font-normal text-[color:var(--text-secondary)]">orang</span></h3>
-              <p className="text-[10px] font-medium text-[color:var(--accent-primary)] flex items-center gap-1">
-                <ArrowUp className="w-3 h-3" /> 15.3% <span className="text-[color:var(--text-tertiary)] font-normal">dari kemarin</span>
-              </p>
-            </div>
-            <div className="w-12 h-12 rounded-xl bg-[color:rgba(168,207,188,0.1)] flex items-center justify-center border border-[color:rgba(168,207,188,0.2)]">
-              <Users className="w-6 h-6 text-[color:var(--accent-tertiary)]" />
-            </div>
-          </div>
-        </div>
-
-        <div className="card-ui relative overflow-hidden group">
-          <div className="absolute right-0 top-0 w-32 h-32 bg-[color:var(--accent-primary)] opacity-5 rounded-full blur-3xl group-hover:opacity-10 transition-opacity"></div>
-          <div className="relative z-10 flex justify-between items-center">
-            <div>
-              <p className="text-xs font-medium text-[color:var(--text-tertiary)] mb-1">Karbon Tereduksi</p>
-              <h3 className="text-2xl font-bold font-mono text-[color:var(--text-primary)] mb-1">62.4 <span className="text-xs font-sans font-normal text-[color:var(--text-secondary)]">kg</span></h3>
-              <p className="text-[10px] font-medium text-[color:var(--accent-primary)] flex items-center gap-1">
-                <ArrowUp className="w-3 h-3" /> 20.1% <span className="text-[color:var(--text-tertiary)] font-normal">dari kemarin</span>
-              </p>
-            </div>
-            <div className="w-12 h-12 rounded-xl bg-[color:rgba(78,222,163,0.1)] flex items-center justify-center border border-[color:rgba(78,222,163,0.2)]">
-              <Recycle className="w-6 h-6 text-[color:var(--accent-primary)]" />
-            </div>
-          </div>
-        </div>
+    <div className="glass-panel rounded-2xl overflow-hidden flex flex-col" style={{ background: 'rgba(26, 33, 30, 0.4)' }}>
+      <div className="p-md flex justify-between items-center border-b border-outline-variant/30 bg-white/5">
+        <h5 className="font-label text-xs text-primary uppercase tracking-wider">Status Mesin RVM</h5>
+        <button className="text-[10px] text-primary font-bold hover:underline">Lihat Semua</button>
       </div>
-
-      {/* Charts Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-shrink-0">
-        <div className="card-ui lg:col-span-2 relative z-10 flex flex-col min-h-[300px]">
-          <h3 className="text-sm font-bold font-headline text-[color:var(--text-primary)] mb-4">Tren Pengumpulan Botol</h3>
-          <div className="flex-1 w-full relative">
-            <LineChartRVM />
-          </div>
-        </div>
-        <div className="card-ui lg:col-span-1 relative z-10 flex flex-col min-h-[300px]">
-          <h3 className="text-sm font-bold font-headline text-[color:var(--text-primary)] mb-4">Komposisi Material</h3>
-          <div className="flex-1 w-full relative">
-            <DonutChartRVM />
-          </div>
-        </div>
-      </div>
-
-      {/* Main Grid: Network Monitoring & Detail */}
-      <div className="flex-1 min-h-[400px] grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        
-        {/* Network Monitoring List (Takes 2/3 space) */}
-        <div className="card-ui lg:col-span-2 xl:col-span-3 flex flex-col overflow-hidden">
-          <div className="flex justify-between items-center mb-4 flex-shrink-0">
-            <h3 className="font-headline font-bold text-lg text-[color:var(--text-primary)]">RVM Network Monitoring</h3>
-            <div className="flex gap-2">
-              <span className="badgePremium">
-                <div className="w-2 h-2 rounded-full bg-[color:var(--accent-primary)] shadow-[0_0_8px_var(--accent-primary)] animate-pulse-organic"></div>
-                4 Online
-              </span>
-              <span className="badgePremium border-[color:rgba(255,180,171,0.2)] bg-[color:rgba(255,180,171,0.1)] text-[color:var(--accent-danger)]">
-                <div className="w-2 h-2 rounded-full bg-[color:var(--accent-danger)]"></div>
-                1 Penuh
-              </span>
-            </div>
-          </div>
-          
-          <div className="overflow-x-auto overflow-y-auto custom-scrollbar flex-1 pr-2">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="text-xs text-[color:var(--text-tertiary)] border-b border-[color:var(--border-subtle)]">
-                  <th className="pb-3 font-medium sticky top-0 bg-[color:var(--surface-secondary)] z-10 pl-2">ID Unit</th>
-                  <th className="pb-3 font-medium sticky top-0 bg-[color:var(--surface-secondary)] z-10">Lokasi</th>
-                  <th className="pb-3 font-medium sticky top-0 bg-[color:var(--surface-secondary)] z-10">Status</th>
-                  <th className="pb-3 font-medium text-center sticky top-0 bg-[color:var(--surface-secondary)] z-10">Kapasitas</th>
-                  <th className="pb-3 font-medium sticky top-0 bg-[color:var(--surface-secondary)] z-10">Isi / Maks</th>
-                  <th className="pb-3 font-medium text-right sticky top-0 bg-[color:var(--surface-secondary)] z-10 pr-2">Aksi</th>
-                </tr>
-              </thead>
-              <tbody className="text-sm">
-                {mesinStatus.map((m, i) => {
-                  const isPenuh = m.status === 'Penuh';
-                  const isSelected = selectedMachine === m.id;
-                  return (
-                    <tr 
-                      key={m.id} 
-                      onClick={() => setSelectedMachine(m.id)}
-                      className={clsx(
-                        "border-b border-[color:var(--border-subtle)] last:border-0 transition-colors cursor-pointer group",
-                        isSelected ? "bg-[color:rgba(78,222,163,0.05)]" : "hover:bg-[color:var(--surface-tertiary)]"
+      <div className="overflow-x-auto">
+        <table className="w-full text-left border-collapse" aria-label="Status Mesin RVM">
+          <thead>
+            <tr className="text-[10px] text-on-surface-variant uppercase font-label tracking-wider border-b border-outline-variant/30">
+              <th className="px-md py-sm" scope="col">Mesin</th>
+              <th className="px-md py-sm" scope="col">Lokasi</th>
+              <th className="px-md py-sm" scope="col">Status</th>
+              <th className="px-md py-sm" scope="col">Kapasitas</th>
+              <th className="px-md py-sm" scope="col">Isi / Maks</th>
+              <th className="px-md py-sm" scope="col">Kondisi</th>
+            </tr>
+          </thead>
+          <tbody className="text-xs">
+            {mesinList.map((m) => (
+              <tr key={m.id} className="border-b border-outline-variant/20 hover:bg-primary/5 transition-colors last:border-0">
+                <td className="px-md py-md font-bold text-primary">{m.id}</td>
+                <td className="px-md py-md text-on-surface-variant">{m.lokasi}</td>
+                <td className="px-md py-md">{getStatusBadge(m.status)}</td>
+                <td className="px-md py-md">
+                  <div className="relative w-8 h-8">
+                    <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
+                      <circle cx="18" cy="18" r="16" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="4" />
+                      <circle
+                        cx="18" cy="18" r="16"
+                        fill="none"
+                        stroke={m.strokeColor}
+                        strokeDasharray={`${m.kapasitas} 100`}
+                        strokeWidth="4"
+                      />
+                    </svg>
+                    <span className="absolute inset-0 flex items-center justify-center text-[8px] font-bold font-label">
+                      {m.kapasitas}%
+                    </span>
+                  </div>
+                </td>
+                <td className="px-md py-md text-on-surface-variant">
+                  <span className={`font-bold ${getKondisiColor(m.status)}`}>{m.isi}</span> / {m.maks} botol
+                </td>
+                <td className="px-md py-md">
+                  <div className="flex items-center gap-xs">
+                    <span className={`text-[10px] ${getKondisiColor(m.status)}`}>{m.kondisi}</span>
+                    <svg width="24" height="12" className="opacity-50" aria-hidden="true">
+                      {m.status === 'Online' && (
+                        <path d="M0,6 L4,6 L6,2 L10,10 L12,6 L24,6" fill="none" stroke={getWaveColor(m.status)} strokeWidth="1.5" />
                       )}
-                    >
-                      <td className="py-3 pl-2">
-                        <div className="flex items-center gap-2">
-                          <Cpu className="w-4 h-4 text-[color:var(--text-tertiary)] group-hover:text-[color:var(--accent-primary)] transition-colors" />
-                          <span className={clsx("font-mono font-bold", isSelected ? "text-[color:var(--accent-primary)]" : "text-[color:var(--text-primary)]")}>{m.id}</span>
-                        </div>
-                      </td>
-                      <td className="py-3 text-[color:var(--text-secondary)] flex items-center gap-1">
-                        <MapPin className="w-3 h-3 text-[color:var(--text-tertiary)]" /> {m.lokasi}
-                      </td>
-                      <td className="py-3">
-                        <span className={clsx(
-                          "text-[10px] px-2.5 py-1 rounded-md border font-medium flex items-center gap-1.5 w-max",
-                          isPenuh 
-                            ? "border-[color:rgba(255,180,171,0.2)] text-[color:var(--accent-danger)] bg-[color:rgba(255,180,171,0.1)]" 
-                            : "border-[color:rgba(78,222,163,0.2)] text-[color:var(--accent-primary)] bg-[color:rgba(78,222,163,0.1)]"
-                        )}>
-                          <div className={clsx("w-1.5 h-1.5 rounded-full", isPenuh ? "bg-[color:var(--accent-danger)]" : "bg-[color:var(--accent-primary)] animate-pulse-organic")}></div>
-                          {m.status}
-                        </span>
-                      </td>
-                      <td className="py-3">
-                        <div className="flex items-center justify-center">
-                          <div className="relative w-10 h-10 flex items-center justify-center">
-                            <svg className="w-10 h-10 transform -rotate-90 drop-shadow-[0_0_2px_rgba(78,222,163,0.3)]">
-                              <circle cx="20" cy="20" r="16" stroke="currentColor" strokeWidth="4" fill="transparent" className="text-[color:var(--surface-tertiary)]" />
-                              <circle cx="20" cy="20" r="16" stroke="currentColor" strokeWidth="4" fill="transparent" strokeDasharray={`${m.kapasitas} 100`} className={isPenuh ? 'text-[color:var(--accent-danger)]' : 'text-[color:var(--accent-primary)]'} />
-                            </svg>
-                            <span className="absolute text-[9px] font-bold font-mono text-[color:var(--text-primary)]">{m.kapasitas}%</span>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="py-3 font-mono text-xs">
-                        <span className={clsx("font-bold", isPenuh ? "text-[color:var(--accent-danger)]" : "text-[color:var(--text-primary)]")}>{m.isi}</span>
-                        <span className="text-[color:var(--text-tertiary)]"> / {m.maks}</span>
-                      </td>
-                      <td className="py-3 text-right pr-2">
-                        <button className="text-[10px] font-medium text-[color:var(--accent-secondary)] bg-[color:rgba(149,211,186,0.1)] hover:bg-[color:rgba(149,211,186,0.2)] px-3 py-1.5 rounded transition-colors border border-[color:rgba(149,211,186,0.2)]">
-                          View
-                        </button>
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        {/* Camera Feed Detail (Takes 1/3 space) */}
-        <div className="lg:col-span-1 flex flex-col h-full">
-          <CameraFeed machineId={selectedMachine} />
-        </div>
-        
+                      {m.status === 'Penuh' && (
+                        <path d="M0,6 L4,6 L6,0 L10,12 L12,6 L24,6" fill="none" stroke={getWaveColor(m.status)} strokeWidth="1.5" />
+                      )}
+                      {m.status === 'Maintenance' && (
+                        <path d="M0,6 L24,6" fill="none" stroke={getWaveColor(m.status)} strokeWidth="1.5" />
+                      )}
+                    </svg>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
-    </main>
+    </div>
+  );
+}
+
+// ── Main Page ──────────────────────────────────────────────────────────────────
+
+export default function AdminDashboard() {
+  const { latestEvent } = useMqtt();
+  const [logs, setLogs] = useState<ActivityLog[]>(mockLogs);
+
+  useEffect(() => {
+    if (latestEvent) {
+      const newLog: ActivityLog = {
+        type: 'success',
+        title: 'Botol berhasil diterima',
+        desc: `${latestEvent.data?.mesin?.id_mesin ?? 'RVM'}`,
+        time: new Date().toLocaleTimeString('id-ID', { hour12: false }),
+        poin: `+${latestEvent.data?.transaksi?.jumlah_poin ?? 10} poin`,
+        avatar: mockLogs[0].avatar,
+      };
+      setLogs((prev) => [newLog, ...prev].slice(0, 10));
+    }
+  }, [latestEvent]);
+
+  // Glass panel mouse move effect
+  const handlePanelMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const el = e.currentTarget as HTMLDivElement;
+    const rect = el.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    el.style.background = `radial-gradient(circle at ${x}px ${y}px, rgba(78, 222, 163, 0.05) 0%, rgba(26, 33, 30, 0.4) 50%)`;
+  };
+  const handlePanelMouseLeave = (e: React.MouseEvent<HTMLDivElement>) => {
+    (e.currentTarget as HTMLDivElement).style.background = 'rgba(26, 33, 30, 0.4)';
+  };
+
+  return (
+    <div className="ml-64 flex flex-col min-h-screen">
+      <Header />
+
+      <main className="p-gutter flex flex-col gap-gutter">
+        {/* ── KPI Cards ── */}
+        <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-md" aria-label="KPI Cards">
+          <StatCard label="Total Botol Hari Ini" value="1.247" unit="botol" trend="18.4% dari kemarin" icon="recycling" />
+          <StatCard label="Total Poin Diberikan" value="12.470" unit="poin" trend="22.7% dari kemarin" icon="stars" />
+          <StatCard label="Pengguna Aktif" value="342" unit="orang" trend="15.3% dari kemarin" icon="group" />
+          <StatCard label="Sampah Berhasil Dikurangi" value="62.4" unit="kg" trend="20.1% dari kemarin" icon="eco" />
+        </section>
+
+        {/* ── Charts ── */}
+        <section className="grid grid-cols-1 lg:grid-cols-3 gap-md" aria-label="Charts">
+          {/* Line Chart */}
+          <div
+            className="lg:col-span-2 glass-panel p-md rounded-2xl flex flex-col"
+            style={{ background: 'rgba(26, 33, 30, 0.4)' }}
+            onMouseMove={handlePanelMouseMove}
+            onMouseLeave={handlePanelMouseLeave}
+          >
+            <div className="flex justify-between items-center mb-lg">
+              <h5 className="font-label text-sm text-primary">Grafik Pengumpulan Botol</h5>
+              <div className="flex items-center gap-xs px-sm py-1 bg-surface-container rounded-lg border border-outline-variant/30 text-[10px] cursor-pointer">
+                <span>Per Jam</span>
+                <span className="material-symbols-outlined text-xs">expand_more</span>
+              </div>
+            </div>
+            <LineChart />
+            <div className="flex justify-between mt-sm text-[10px] text-on-surface-variant font-label uppercase tracking-tighter opacity-60">
+              {['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '24:00'].map((t) => (
+                <span key={t}>{t}</span>
+              ))}
+            </div>
+          </div>
+
+          {/* Donut Chart */}
+          <DonutChart />
+        </section>
+
+        {/* ── Bottom: Feed & Table ── */}
+        <section className="grid grid-cols-1 lg:grid-cols-5 gap-md" aria-label="Activity and Machine Status">
+          <div className="lg:col-span-2">
+            <ActivityFeed logs={logs} />
+          </div>
+          <div className="lg:col-span-3">
+            <MesinTable mesinList={mesinStatusList} />
+          </div>
+        </section>
+      </main>
+
+      {/* Footer */}
+      <footer className="mt-auto px-gutter py-md border-t border-outline-variant/30 flex justify-between items-center text-[10px] text-on-surface-variant opacity-50 uppercase tracking-widest font-label font-bold">
+        <div className="flex items-center gap-sm">
+          <span className="w-2 h-2 rounded-full bg-primary pulse-emerald" />
+          <span>Sistem Online &amp; Terhubung</span>
+        </div>
+        <span>EARN System v1.0.0</span>
+        <span>© 2025 Eco Action &amp; Reward Network</span>
+      </footer>
+    </div>
   );
 }

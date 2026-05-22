@@ -3,176 +3,49 @@
 @tailwind utilities;
 
 /* ══════════════════════════════════════════════
-   Verdant Growth (Bio-Digital Minimalism 2026) — Base Tokens
+   EARN — Bio-Digital Minimalism 2026
+   Global Styles & Utilities
    ══════════════════════════════════════════════ */
-
-:root {
-  /* ── Surface Colors (Dark Mode By Default) ── */
-  --surface-primary:     #0e1512;
-  --surface-secondary:   #161d1a;
-  --surface-tertiary:    #1a211e;
-  --surface-elevated:    #242c28;
-  --surface-glass:       rgba(22, 29, 26, 0.75);
-
-  /* ── Text Colors ── */
-  --text-primary:        #dde4df;
-  --text-secondary:      #bbcabf;
-  --text-tertiary:       #86948a;
-  --text-inverse:        #0e1512;
-  
-  /* ── Accent / Brand (Botanical Colors) ── */
-  --accent-primary:      #4edea3; /* Emerald */
-  --accent-primary-dim:  #6ffbbe;
-  --accent-hover:        #10b981;
-  --accent-secondary:    #95d3ba; /* Forest Green */
-  --accent-tertiary:     #a8cfbc; /* Soft Mint */
-  
-  --accent-success:      #4edea3;
-  --accent-warning:      #b0f0d6;
-  --accent-danger:       #ffb4ab;
-
-  /* ── Border & Divider ── */
-  --border-subtle:       #2f3633;
-  --border-default:      #3c4a42;
-  --border-strong:       #86948a;
-
-  /* ── Typography Scale ── */
-  --font-headline: 'Hanken Grotesk', system-ui, sans-serif;
-  --font-sans: 'Inter', system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
-  
-  --text-sm: clamp(0.833rem, 0.78rem + 0.27vw, 0.96rem);
-  --text-base: clamp(1rem, 0.93rem + 0.36vw, 1.15rem);
-  --text-lg: clamp(1.2rem, 1.1rem + 0.5vw, 1.38rem);
-  --text-xl: clamp(1.44rem, 1.3rem + 0.7vw, 1.66rem);
-  --text-2xl: clamp(1.728rem, 1.54rem + 0.94vw, 1.99rem);
-  --text-3xl: clamp(2.074rem, 1.82rem + 1.27vw, 2.39rem);
-
-  /* ── Spacing Scale ── */
-  --space-2: 0.5rem;
-  --space-3: 0.75rem;
-  --space-4: 1rem;
-  --space-6: 1.5rem;
-  --space-8: 2rem;
-
-  /* ── Radius ── */
-  --radius-sm: 0.25rem;
-  --radius-md: 0.5rem;
-  --radius-lg: 1rem;
-  --radius-xl: 1.5rem;
-  --radius-full: 9999px;
-
-  /* ── Organic Glows (Elevation & Depth) ── */
-  --glow-sm: 0 2px 8px -2px rgba(78, 222, 163, 0.1);
-  --glow-md: 0 4px 12px -2px rgba(78, 222, 163, 0.15), 0 2px 6px -2px rgba(78, 222, 163, 0.1);
-  --glow-lg: 0 8px 24px -4px rgba(78, 222, 163, 0.2), 0 4px 8px -4px rgba(78, 222, 163, 0.1);
-  
-  /* Glassmorphic Shadows */
-  --shadow-glass: 0 8px 32px rgba(14, 21, 18, 0.4), inset 0 0 0 1px rgba(78, 222, 163, 0.1);
-  --shadow-panel: 0 4px 16px rgba(14, 21, 18, 0.6);
-
-  /* ── Motion ── */
-  --duration-fast: 150ms;
-  --duration-normal: 250ms;
-  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
-}
 
 body {
-  background-color: var(--surface-primary);
-  color: var(--text-primary);
-  font-family: var(--font-sans);
-  font-size: var(--text-base);
-  line-height: 1.6;
-  -webkit-font-smoothing: antialiased;
+  background-color: #0e1512;
+  color: #dde4df;
+  overflow-x: hidden;
+  font-family: 'Inter', sans-serif;
 }
 
-/* Typography Helpers */
-.font-headline {
-  font-family: var(--font-headline);
-}
-.font-mono {
-  font-family: var(--font-mono);
-}
-
-/* ══════════════════════════════════════════════
-   Components (Verdant Growth)
-   ══════════════════════════════════════════════ */
-
+/* ── Glass Panel ── */
 .glass-panel {
-  background: var(--surface-glass);
-  backdrop-filter: blur(20px) saturate(1.2);
-  -webkit-backdrop-filter: blur(20px) saturate(1.2);
-  border: 1px solid rgba(78, 222, 163, 0.1); /* Emerald inner border */
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-glass);
+  background: rgba(26, 33, 30, 0.4);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(78, 222, 163, 0.05);
 }
 
-.card-ui {
-  background: var(--surface-secondary);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-panel);
-  padding: var(--space-4) var(--space-6);
-  transition: border-color var(--duration-normal) var(--ease-out), box-shadow var(--duration-normal) var(--ease-out), transform var(--duration-normal) var(--ease-out);
-}
-.card-ui:hover {
-  border-color: rgba(78, 222, 163, 0.3);
-  box-shadow: var(--glow-md);
-  transform: translateY(-2px);
+/* ── Sidebar Active State ── */
+.sidebar-active {
+  background: linear-gradient(90deg, rgba(78, 222, 163, 0.15) 0%, rgba(78, 222, 163, 0) 100%);
+  border-left: 4px solid #4edea3;
 }
 
-/* Active List Stem Indicator */
-.stem-active {
-  position: relative;
-}
-.stem-active::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 10%;
-  bottom: 10%;
-  width: 4px;
-  background-color: var(--accent-primary);
-  border-radius: 0 4px 4px 0;
-  box-shadow: 0 0 8px var(--accent-primary);
+/* ── Pulse Emerald Animation ── */
+.pulse-emerald {
+  animation: pulse-emerald 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
-/* Premium Badge */
-.badgePremium {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-2) var(--space-3);
-  border-radius: var(--radius-full);
-  background-color: rgba(78, 222, 163, 0.1);
-  border: 1px solid rgba(78, 222, 163, 0.2);
-  color: var(--accent-primary);
-  font-family: var(--font-sans);
-  font-size: var(--text-sm);
-  font-weight: 500;
-  transition: all var(--duration-normal) var(--ease-out);
-}
-.badgePremium:hover {
-  background-color: rgba(78, 222, 163, 0.15);
-  box-shadow: var(--glow-sm);
+@keyframes pulse-emerald {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: .5; transform: scale(1.2); }
 }
 
-/* Organic Pulse Dot */
+/* ── Dot Active Pulse ── */
 .dotActive {
   width: 8px;
   height: 8px;
-  border-radius: var(--radius-full);
-  background-color: var(--accent-primary);
-  box-shadow: 0 0 8px var(--accent-primary);
-  animation: pulse-organic 2s infinite var(--ease-out);
-}
-.dotOffline {
-  width: 8px;
-  height: 8px;
-  border-radius: var(--radius-full);
-  background-color: var(--accent-danger);
-  box-shadow: 0 0 8px var(--accent-danger);
+  border-radius: 9999px;
+  background-color: #4edea3;
+  box-shadow: 0 0 8px #4edea3;
+  animation: pulse-organic 2s infinite;
 }
 
 @keyframes pulse-organic {
@@ -181,37 +54,53 @@ body {
   100% { box-shadow: 0 0 0 0 rgba(78, 222, 163, 0); }
 }
 
-/* Scanner Bar Animation for AI Camera Mock */
-.scanner-bar {
-  position: absolute;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background-color: var(--accent-primary);
-  box-shadow: 0 0 15px 2px var(--accent-primary);
-  animation: scan-vertical 3s infinite linear;
-  opacity: 0.7;
+/* ── Custom Scrollbar ── */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.02);
+}
+::-webkit-scrollbar-thumb {
+  background: #4edea3;
+  border-radius: 10px;
 }
 
-@keyframes scan-vertical {
-  0% { top: 5%; opacity: 0; }
-  10% { opacity: 0.7; }
-  90% { opacity: 0.7; }
-  100% { top: 95%; opacity: 0; }
+/* ── Font Helpers ── */
+.font-headline {
+  font-family: 'Hanken Grotesk', sans-serif;
+}
+.font-label {
+  font-family: 'JetBrains Mono', monospace;
 }
 
-/* Custom Scrollbar for True Dark Mode */
-.custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+/* ── Cyber Glow ── */
+.cyber-glow-leaf {
+  box-shadow: 0 0 15px rgba(78, 222, 163, 0.1);
 }
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
+
+/* ── Chart Drop Shadow ── */
+.chart-line-glow {
+  filter: drop-shadow(0 0 8px rgba(78, 222, 163, 0.5));
 }
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background-color: var(--border-subtle);
-  border-radius: var(--radius-full);
+
+/* ── Radial hover gradient for glass panels ── */
+.glass-panel-hover {
+  transition: background 0.3s ease;
 }
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background-color: var(--border-default);
+
+/* ── Animate pulse for animate-pulse-organic ── */
+.animate-pulse-organic {
+  animation: pulse-organic 2s infinite;
+}
+
+/* ── Prefers Reduced Motion ── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

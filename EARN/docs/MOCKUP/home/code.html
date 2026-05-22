@@ -1,0 +1,624 @@
+<!DOCTYPE html><html class="dark" lang="en" style=""><head></head><body class="font-body-md text-body-md antialiased"><svg aria-hidden="true" class="inline-defs-container" style="position:absolute;width:0;height:0;overflow:hidden"></svg>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>EARN - Eco Action &amp; Reward Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&amp;family=Inter:wght@300;400;500;600&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<!-- Tailwind Configuration -->
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+                "tertiary-fixed-dim": "#a8cfbc",
+                "on-secondary-fixed": "#002117",
+                "surface-tint": "#4edea3",
+                "on-primary": "#003824",
+                "on-tertiary-fixed": "#002115",
+                "tertiary-fixed": "#c3ecd7",
+                "primary-container": "#10b981",
+                "on-secondary-container": "#83c2a9",
+                "secondary-container": "#0b513d",
+                "secondary-fixed": "#b0f0d6",
+                "on-error-container": "#ffdad6",
+                "tertiary-container": "#84ab98",
+                "secondary-fixed-dim": "#95d3ba",
+                "tertiary": "#a8cfbc",
+                "inverse-surface": "#dde4df",
+                "error-container": "#93000a",
+                "outline": "#86948a",
+                "inverse-primary": "#006c49",
+                "primary-fixed": "#6ffbbe",
+                "on-surface": "#dde4df",
+                "surface-bright": "#333b37",
+                "primary": "#4edea3",
+                "on-tertiary-fixed-variant": "#294e3f",
+                "inverse-on-surface": "#2b322e",
+                "error": "#ffb4ab",
+                "background": "#0e1512",
+                "on-background": "#dde4df",
+                "on-primary-container": "#00422b",
+                "on-primary-fixed": "#002113",
+                "surface-container-low": "#161d1a",
+                "surface-variant": "#2f3633",
+                "surface-container-lowest": "#09100d",
+                "on-error": "#690005",
+                "on-secondary": "#003829",
+                "on-surface-variant": "#bbcabf",
+                "primary-fixed-dim": "#4edea3",
+                "on-tertiary-container": "#1b3f31",
+                "outline-variant": "#3c4a42",
+                "surface-container": "#1a211e",
+                "secondary": "#95d3ba",
+                "surface-container-highest": "#2f3633",
+                "on-tertiary": "#113729",
+                "on-primary-fixed-variant": "#005236",
+                "on-secondary-fixed-variant": "#0b513d",
+                "surface-container-high": "#242c28",
+                "surface-dim": "#0e1512",
+                "surface": "#0e1512"
+        },
+        "borderRadius": {
+                "DEFAULT": "0.25rem",
+                "lg": "0.5rem",
+                "xl": "0.75rem",
+                "full": "9999px"
+        },
+        "spacing": {
+                "margin-mobile": "16px",
+                "sm": "12px",
+                "lg": "48px",
+                "md": "24px",
+                "gutter": "24px",
+                "margin-desktop": "64px",
+                "base": "8px",
+                "xl": "80px",
+                "xs": "4px"
+        },
+        "fontFamily": {
+                "headline-lg-mobile": ["Hanken Grotesk"],
+                "headline-xl": ["Hanken Grotesk"],
+                "body-md": ["Inter"],
+                "headline-lg": ["Hanken Grotesk"],
+                "label-sm": ["JetBrains Mono"],
+                "label-md": ["JetBrains Mono"],
+                "body-sm": ["Inter"]
+        },
+        "fontSize": {
+                "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "600"}],
+                "headline-xl": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                "label-sm": ["12px", {"lineHeight": "14px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                "label-md": ["14px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}]
+        }
+      },
+    },
+  }
+</script>
+<style>
+        body {
+            background-color: #0e1512;
+            color: #dde4df;
+            overflow-x: hidden;
+        }
+
+        .glass-panel {
+            background: rgba(26, 33, 30, 0.4);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(78, 222, 163, 0.05);
+        }
+
+        .cyber-glow-leaf {
+            box-shadow: 0 0 15px rgba(78, 222, 163, 0.1);
+        }
+
+        .pulse-emerald {
+            animation: pulse-emerald 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        @keyframes pulse-emerald {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: .5; transform: scale(1.2); }
+        }
+
+        .sidebar-active {
+            background: linear-gradient(90deg, rgba(78, 222, 163, 0.15) 0%, rgba(78, 222, 163, 0) 100%);
+            border-left: 4px solid #4edea3;
+        }
+
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.02);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #4edea3;
+            border-radius: 10px;
+        }
+        
+        .font-headline { font-family: 'Hanken Grotesk', sans-serif; }
+        .font-label { font-family: 'JetBrains Mono', monospace; }
+    </style>
+
+
+<!-- SideNavBar -->
+<aside class="h-screen w-64 fixed left-0 top-0 bg-surface-container-lowest border-r border-outline-variant/30 flex flex-col z-50">
+<div class="p-md">
+<div class="flex items-center gap-base mb-base">
+<div class="w-10 h-10 rounded-lg bg-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-on-primary font-bold">eco</span>
+</div>
+<div>
+<h1 class="font-headline text-2xl font-bold text-primary tracking-tighter">EARN</h1>
+<p class="text-[10px] text-on-surface-variant font-label uppercase tracking-widest opacity-70">Eco Action &amp; Reward Network</p>
+</div>
+</div>
+</div>
+<nav class="flex-1 px-sm space-y-1">
+<a class="flex items-center gap-sm px-md py-sm rounded-lg text-primary sidebar-active transition-all" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="font-body-md">Home</span>
+</a>
+<a class="flex items-center gap-sm px-md py-sm rounded-lg text-on-surface-variant hover:bg-white/5 transition-all" href="#">
+<span class="material-symbols-outlined">sensors</span>
+<span class="font-body-md">Mesin RVM</span>
+</a>
+<a class="flex items-center gap-sm px-md py-sm rounded-lg text-on-surface-variant hover:bg-white/5 transition-all" href="#">
+<span class="material-symbols-outlined">receipt_long</span>
+<span class="font-body-md">Transaksi</span>
+</a>
+<a class="flex items-center gap-sm px-md py-sm rounded-lg text-on-surface-variant hover:bg-white/5 transition-all" href="#">
+<span class="material-symbols-outlined">group</span>
+<span class="font-body-md">Pengguna</span>
+</a>
+<a class="flex items-center gap-sm px-md py-sm rounded-lg text-on-surface-variant hover:bg-white/5 transition-all" href="#">
+<span class="material-symbols-outlined">card_giftcard</span>
+<span class="font-body-md">Reward &amp; Voucher</span>
+</a>
+<a class="flex items-center gap-sm px-md py-sm rounded-lg text-on-surface-variant hover:bg-white/5 transition-all" href="#">
+<span class="material-symbols-outlined">bar_chart</span>
+<span class="font-body-md">Laporan</span>
+</a>
+<a class="flex items-center gap-sm px-md py-sm rounded-lg text-on-surface-variant hover:bg-white/5 transition-all" href="#">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-body-md">Analitik</span>
+</a>
+</nav>
+<!-- Impact Widget (Sidebar Bottom) -->
+<div class="mt-auto p-md border-t border-outline-variant/30">
+<div class="bg-surface-container rounded-xl p-md space-y-md relative overflow-hidden">
+<div class="absolute -right-4 -bottom-4 opacity-10">
+<span class="material-symbols-outlined text-[80px] text-primary">eco</span>
+</div>
+<h6 class="font-label text-xs text-primary uppercase tracking-wider">Ringkasan Dampak</h6>
+<div class="space-y-sm relative z-10">
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary">recycling</span>
+<div>
+<p class="text-sm font-bold text-on-surface">1.247</p>
+<p class="text-[10px] text-on-surface-variant">Botol Terkumpul</p>
+</div>
+</div>
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-secondary">co2</span>
+<div>
+<p class="text-sm font-bold text-on-surface">62.4 kg</p>
+<p class="text-[10px] text-on-surface-variant">CO2 Dikurangi</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Wrapper -->
+<div class="ml-64 flex flex-col min-h-screen">
+<!-- TopAppBar -->
+<header class="h-20 bg-background/50 backdrop-blur-md sticky top-0 z-40 flex justify-between items-center px-gutter border-b border-outline-variant/30">
+<div class="flex flex-col">
+<div class="flex items-center gap-sm">
+<h2 class="font-headline text-2xl font-bold text-primary">Home</h2>
+<span class="material-symbols-outlined text-primary text-sm">eco</span>
+</div>
+<p class="text-xs text-on-surface-variant">Dashboard Monitoring Sistem EARN</p>
+</div>
+<div class="flex items-center gap-md">
+<!-- Location & Date Selectors -->
+<div class="hidden md:flex items-center gap-sm">
+<div class="flex items-center gap-xs px-sm py-2 bg-surface-container rounded-lg border border-outline-variant/30 cursor-pointer hover:border-primary/40 transition-all">
+<span class="material-symbols-outlined text-sm">calendar_month</span>
+<span class="text-xs">Hari Ini</span>
+<span class="material-symbols-outlined text-sm">expand_more</span>
+</div>
+</div>
+<div class="h-8 w-[1px] bg-white/10 mx-xs"></div>
+<div class="flex items-center gap-md gap-4">
+<div class="relative flex items-center justify-center"></div><div class="relative">
+<span class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors cursor-pointer">notifications</span>
+<span class="absolute -top-1 -right-1 w-3 h-3 bg-error rounded-full border-2 border-background flex items-center justify-center text-[8px] font-bold">3</span>
+</div><div class="relative flex items-center justify-center"><span class="material-symbols-outlined text-on-surface-variant hover:text-primary-fixed cursor-pointer transition-colors">light_mode</span></div><div class="relative flex items-center justify-center"><span class="material-symbols-outlined text-on-surface-variant hover:text-primary-fixed cursor-pointer transition-colors">settings</span></div>
+<div class="flex items-center gap-sm bg-surface-container pl-sm pr-xs py-xs rounded-full border border-outline-variant/30">
+<div class="text-right">
+<p class="text-[12px] font-bold text-primary">Admin</p>
+<p class="text-[10px] text-on-surface-variant leading-none">Super Admin</p>
+</div>
+<img alt="Admin avatar" class="w-8 h-8 rounded-full border border-primary/20" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDgODpEKbz6oZBhVOmiLYpZI1hxCuC09c-L6Jy2AIuIcPvVFgiYqsBaWJ3o1zY3QT3fAf1B3Qhgk_iAc0gQ1FunscmSPTYZXgAiiGkMV9kRPU1OZEPEj3IfeK245TA3jVfr-SYV3-NolFGzC3Zj4OhRwcX6zDYP0cKsDpcCQeXG4GM3iNZ8jHk7vhSQ1VwvBvsSdPQo3fPgJyGOHqD_vvja_SCCsjhCnH_zRoGKS0RYcO8Vid1BN7aTjDEnIX15nPIyuoOHMAqvrNU">
+</div>
+</div>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="p-gutter flex flex-col gap-gutter">
+<!-- Top Section: 4 Stat Cards -->
+<section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-md">
+<!-- Total Botol -->
+<div class="glass-panel p-md rounded-2xl relative overflow-hidden hover:border-primary/20 transition-all group" style="background: rgba(26, 33, 30, 0.4);">
+<div class="absolute -right-4 -bottom-4 opacity-10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-[80px] text-primary">recycling</span>
+</div>
+<p class="text-xs text-on-surface-variant uppercase font-label tracking-wider mb-sm">Total Botol Hari Ini</p>
+<div class="flex items-baseline gap-xs mb-xs">
+<h4 class="text-2xl font-headline font-bold text-primary">1.247</h4>
+<span class="text-xs text-on-surface-variant">botol</span>
+</div>
+<div class="flex items-center gap-xs text-[10px] text-primary-fixed-dim font-bold">
+<span class="material-symbols-outlined text-xs">arrow_upward</span>
+<span class="">18.4% dari kemarin</span>
+</div>
+</div>
+<!-- Total Poin -->
+<div class="glass-panel p-md rounded-2xl relative overflow-hidden hover:border-secondary/20 transition-all group" style="background: rgba(26, 33, 30, 0.4);">
+<div class="absolute -right-4 -bottom-4 opacity-10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-[80px] text-secondary">stars</span>
+</div>
+<p class="text-xs text-on-surface-variant uppercase font-label tracking-wider mb-sm">Total Poin Diberikan</p>
+<div class="flex items-baseline gap-xs mb-xs">
+<h4 class="text-2xl font-headline font-bold text-primary">12.470</h4>
+<span class="text-xs text-on-surface-variant">poin</span>
+</div>
+<div class="flex items-center gap-xs text-[10px] text-primary-fixed-dim font-bold">
+<span class="material-symbols-outlined text-xs">arrow_upward</span>
+<span class="">22.7% dari kemarin</span>
+</div>
+</div>
+<!-- Pengguna Aktif -->
+<div class="glass-panel p-md rounded-2xl relative overflow-hidden hover:border-primary/20 transition-all group" style="background: rgba(26, 33, 30, 0.4);">
+<div class="absolute -right-4 -bottom-4 opacity-10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-[80px] text-on-surface-variant">group</span>
+</div>
+<p class="text-xs text-on-surface-variant uppercase font-label tracking-wider mb-sm">Pengguna Aktif</p>
+<div class="flex items-baseline gap-xs mb-xs">
+<h4 class="text-2xl font-headline font-bold text-primary">342</h4>
+<span class="text-xs text-on-surface-variant">orang</span>
+</div>
+<div class="flex items-center gap-xs text-[10px] text-primary-fixed-dim font-bold">
+<span class="material-symbols-outlined text-xs">arrow_upward</span>
+<span class="">15.3% dari kemarin</span>
+</div>
+</div>
+<!-- Sampah Berhasil Dikurangi -->
+<div class="glass-panel p-md rounded-2xl relative overflow-hidden hover:border-primary/20 transition-all group" style="background: rgba(26, 33, 30, 0.4);">
+<div class="absolute -right-4 -bottom-4 opacity-10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-[80px] text-primary">eco</span>
+</div>
+<p class="text-xs text-on-surface-variant uppercase font-label tracking-wider mb-sm">Sampah Berhasil Dikurangi</p>
+<div class="flex items-baseline gap-xs mb-xs">
+<h4 class="text-2xl font-headline font-bold text-primary">62.4</h4>
+<span class="text-xs text-on-surface-variant">kg</span>
+</div>
+<div class="flex items-center gap-xs text-[10px] text-primary-fixed-dim font-bold">
+<span class="material-symbols-outlined text-xs">arrow_upward</span>
+<span class="">20.1% dari kemarin</span>
+</div>
+</div>
+</section>
+<!-- Middle Section: Charts -->
+<section class="grid grid-cols-1 lg:grid-cols-3 gap-md">
+<!-- Line Chart: Grafik Pengumpulan Botol -->
+<div class="lg:col-span-2 glass-panel p-md rounded-2xl flex flex-col" style="background: rgba(26, 33, 30, 0.4);">
+<div class="flex justify-between items-center mb-lg">
+<h5 class="font-label text-sm text-primary">Grafik Pengumpulan Botol</h5>
+<div class="flex items-center gap-xs px-sm py-1 bg-surface-container rounded-lg border border-outline-variant/30 text-[10px] cursor-pointer">
+<span class="">Per Jam</span>
+<span class="material-symbols-outlined text-xs">expand_more</span>
+</div>
+</div>
+<div class="relative h-64 w-full flex items-end">
+<!-- Chart Gridlines & Labels -->
+<div class="absolute inset-0 flex flex-col justify-between text-[10px] text-on-surface-variant opacity-40">
+<div class="w-full border-t border-dashed border-outline-variant/50 flex justify-between items-start"><span class="">1.5K</span></div>
+<div class="w-full border-t border-dashed border-outline-variant/50 flex justify-between items-start"><span class="">1.2K</span></div>
+<div class="w-full border-t border-dashed border-outline-variant/50 flex justify-between items-start"><span class="">900</span></div>
+<div class="w-full border-t border-dashed border-outline-variant/50 flex justify-between items-start"><span class="">600</span></div>
+<div class="w-full border-t border-dashed border-outline-variant/50 flex justify-between items-start"><span class="">300</span></div>
+<div class="w-full border-t border-outline-variant flex justify-between items-start"><span class="">0</span></div>
+</div>
+<!-- Mock Line Chart Path SVG -->
+<svg class="w-full h-full relative z-10" preserveAspectRatio="none" viewBox="0 0 100 100">
+<path class="drop-shadow-[0_0_8px_rgba(78,222,163,0.5)]" d="M0,80 Q10,75 20,70 T40,40 T60,65 T80,30 T100,20" fill="none" stroke="#4edea3" stroke-width="2"></path>
+<path d="M0,80 Q10,75 20,70 T40,40 T60,65 T80,30 T100,20 L100,100 L0,100 Z" fill="url(#chartGradient)" opacity="0.1"></path>
+<defs>
+<linearGradient id="chartGradient" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#4edea3"></stop>
+<stop offset="100%" stop-color="transparent"></stop>
+</linearGradient>
+</defs>
+<!-- Data Point Tooltip Mockup -->
+<circle class="pulse-emerald" cx="40" cy="40" fill="#ffffff" r="3"></circle>
+</svg>
+<!-- Tooltip -->
+<div class="absolute top-[30%] left-[38%] bg-surface-container-highest border border-primary/20 px-sm py-xs rounded-lg shadow-xl z-20">
+<p class="text-[8px] text-on-surface-variant font-bold uppercase font-label">10:00</p>
+<p class="text-[10px] text-primary"><span class="font-bold">1.024</span> botol</p>
+</div>
+</div>
+<div class="flex justify-between mt-sm text-[10px] text-on-surface-variant font-label uppercase tracking-tighter opacity-60">
+<span class="">00:00</span><span class="">04:00</span><span class="">08:00</span><span class="">12:00</span><span class="">16:00</span><span class="">20:00</span><span class="">24:00</span>
+</div>
+</div>
+<!-- Donut Chart -->
+<div class="glass-panel p-md rounded-2xl flex flex-col" style="background: rgba(26, 33, 30, 0.4);">
+<div class="flex justify-between items-center mb-md">
+<h5 class="font-label text-sm text-primary">Distribusi Pengumpulan</h5>
+<div class="flex items-center gap-xs px-sm py-1 bg-surface-container rounded-lg border border-outline-variant/30 text-[10px] cursor-pointer hover:border-primary/40 transition-all">
+<span class="">Hari Ini</span>
+<span class="material-symbols-outlined text-xs">expand_more</span>
+</div>
+</div>
+<div class="flex-1 flex flex-col items-center justify-center py-md">
+<div class="relative w-40 h-40">
+<svg class="w-full h-full -rotate-90" viewBox="0 0 36 36">
+<circle cx="18" cy="18" fill="none" r="15.9" stroke="rgba(255,255,255,0.05)" stroke-width="4"></circle>
+<circle cx="18" cy="18" fill="none" r="15.9" stroke="#10b981" stroke-dasharray="49.7 100" stroke-linecap="round" stroke-width="4"></circle>
+<circle cx="18" cy="18" fill="none" r="15.9" stroke="#84cc16" stroke-dasharray="28.9 100" stroke-dashoffset="-49.7" stroke-linecap="round" stroke-width="4"></circle>
+<circle cx="18" cy="18" fill="none" r="15.9" stroke="#059669" stroke-dasharray="16.1 100" stroke-dashoffset="-78.6" stroke-linecap="round" stroke-width="4"></circle>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center">
+<p class="text-[8px] text-on-surface-variant uppercase font-bold font-label">Total</p>
+<p class="text-2xl font-headline font-bold text-primary leading-none">1.247</p>
+<p class="text-[8px] text-on-surface-variant">botol</p>
+</div>
+</div>
+</div>
+<div class="mt-auto space-y-2">
+<div class="flex justify-between text-[10px] text-on-surface-variant border-b border-outline-variant/30 pb-1 opacity-50 uppercase font-bold font-label">
+<span class="">Mesin</span>
+<div class="flex gap-4">
+<span class="">Botol</span>
+<span class="">Persentase</span>
+</div>
+</div>
+<div class="flex justify-between items-center text-[11px]">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-[#4edea3]" style="background-color: rgb(16, 185, 129);"></span>
+<span class="text-on-surface">RVM-01 <span class="opacity-50">(Fakultas Teknik)</span></span>
+</div>
+<div class="flex gap-10">
+<span class="">620</span>
+<span class="font-bold text-primary" style="color: rgb(16, 185, 129);">49.7%</span>
+</div>
+</div>
+<div class="flex justify-between items-center text-[11px]">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-[#95d3ba]" style="background-color: rgb(132, 204, 22);"></span>
+<span class="text-on-surface">RVM-02 <span class="opacity-50">(Kantin Center)</span></span>
+</div>
+<div class="flex gap-10">
+<span class="">360</span>
+<span class="font-bold text-secondary" style="color: rgb(132, 204, 22);">28.9%</span>
+</div>
+</div>
+<div class="flex justify-between items-center text-[11px]">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-[#0b513d]" style="background-color: rgb(5, 150, 105);"></span>
+<span class="text-on-surface">RVM-03 <span class="opacity-50">(Perpustakaan)</span></span>
+</div>
+<div class="flex gap-10">
+<span class="">200</span>
+<span class="font-bold text-secondary-container" style="color: rgb(5, 150, 105);">16.1%</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Bottom Section: Feed & Table -->
+<section class="grid grid-cols-1 lg:grid-cols-5 gap-md">
+<!-- Aktivitas Terbaru -->
+<div class="lg:col-span-2 glass-panel p-md rounded-2xl flex flex-col" style="background: rgba(26, 33, 30, 0.4);">
+<div class="flex justify-between items-center mb-md">
+<h5 class="font-label text-xs text-primary uppercase tracking-wider">Aktivitas Terbaru</h5>
+<button class="text-[10px] text-primary font-bold hover:underline">Lihat Semua</button>
+</div>
+<div class="space-y-sm overflow-y-auto max-h-[400px] pr-2">
+<!-- Feed Item 1 -->
+<div class="flex items-center gap-md p-sm rounded-xl hover:bg-primary/5 transition-colors group">
+<div class="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-sm">arrow_downward</span>
+</div>
+<img alt="user" class="w-8 h-8 rounded-full border border-outline-variant/30" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCwcJNG_iW9lNGdxVSSpwPKuzTHEaf_2pt_pu0N2J6oVxl6IZypBU8s6iBGEIqH_4nNEW5hddv8VhOtQc6KfIyzm0R5QkOpZsTZywupfzaR9kq73IkinlXnUIQH2bgva4NoqMTvmkcJBA4zIWTcuWRcZ317J9K-NK3TjqsCg_-BxwnRywiUIWovVGB1hmbBmsbGEZyCUC6ICRQDSg6ThJUlUFbgb5BsGYDqO253oGAc8FMPhXDrpud40xvMb2_ara71jWgJnIeGIDM">
+<div class="flex-1">
+<p class="text-xs font-bold text-on-surface">Botol berhasil diterima</p>
+<p class="text-[10px] text-on-surface-variant">RVM-01 (Fakultas Teknik)</p>
+</div>
+<div class="text-right">
+<p class="text-[10px] text-on-surface-variant">10:24:36</p>
+<p class="text-[10px] text-primary font-bold">+10 poin</p>
+</div>
+</div>
+<!-- Feed Item 2 -->
+<div class="flex items-center gap-md p-sm rounded-xl hover:bg-primary/5 transition-colors group">
+<div class="w-8 h-8 rounded-full bg-secondary/20 flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-sm">person</span>
+</div>
+<img alt="user" class="w-8 h-8 rounded-full border border-outline-variant/30" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCX2idl8g_pihtK3Fg8GuKth5KG0uawDSF-uKQdzH35hxBI0IoMztmTPypgxENPBUncojzBmZhTLpTCfGO4sRKatqtMLd-tHSeJWA42D_p4x94x-qg1fddeMC9JQsD1nrGigj7zgugxSTvL927bupFK6WqB6NA_yAdMg2Qrs51XWJ0jCoCFIW_qAIPOZTyqH771e7Ugtu2E1iGxj_2WtE-RT6IoTSfBfh8pKUVk5Vt1PM4Aj9E0JxXpCRDs0TKcpH5wIQbutI5vD_k">
+<div class="flex-1">
+<p class="text-xs font-bold text-on-surface">Poin diberikan ke pengguna</p>
+<p class="text-[10px] text-on-surface-variant">Salsabila Putri</p>
+</div>
+<div class="text-right">
+<p class="text-[10px] text-on-surface-variant">10:24:36</p>
+<p class="text-[10px] text-primary font-bold">+10 poin</p>
+</div>
+</div>
+<!-- Feed Item 3 (Error) -->
+<div class="flex items-center gap-md p-sm rounded-xl hover:bg-primary/5 transition-colors group">
+<div class="w-8 h-8 rounded-full bg-error/20 flex items-center justify-center text-error">
+<span class="material-symbols-outlined text-sm">close</span>
+</div>
+<img alt="user" class="w-8 h-8 rounded-full border border-outline-variant/30" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBLFkw3QhsTNJb-UoxhwcN6DuIhG58IfY0onHWYICvI2bjTlV3DBetwtrrx8BzzN3vqxHhnJ07SX1YfnhhSoe6EdKMIIjTX0hfHUBnD-tsTHTh2DmQMIYWYjvFsZfQLS2t-0l-lTFN69PJZrHzH58QCIeOn0e5m6begBpfC2XtKD2FsW8Men2TGMh7UI-AR6aBOlvETOHxfmVKaUEh_GOMtrEWJDoVzSru7Cd8P9HtSDGWQngtmCipd6OMSYBOh9jWdGAZjGMKnFyw">
+<div class="flex-1">
+<p class="text-xs font-bold text-on-surface">Botol tidak valid</p>
+<p class="text-[10px] text-on-surface-variant">RVM-02 (Kantin Center)</p>
+</div>
+<div class="text-right">
+<p class="text-[10px] text-on-surface-variant">10:24:28</p>
+<p class="text-[10px] text-error font-bold">+0 poin</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Status Mesin RVM Table -->
+<div class="lg:col-span-3 glass-panel rounded-2xl overflow-hidden flex flex-col" style="background: rgba(26, 33, 30, 0.4);">
+<div class="p-md flex justify-between items-center border-b border-outline-variant/30 bg-white/5">
+<h5 class="font-label text-xs text-primary uppercase tracking-wider">Status Mesin RVM</h5>
+<button class="text-[10px] text-primary font-bold hover:underline">Lihat Semua</button>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="text-[10px] text-on-surface-variant uppercase font-label tracking-wider border-b border-outline-variant/30">
+<th class="px-md py-sm">Mesin</th>
+<th class="px-md py-sm">Lokasi</th>
+<th class="px-md py-sm">Status</th>
+<th class="px-md py-sm">Kapasitas</th>
+<th class="px-md py-sm">Isi / Maks</th>
+<th class="px-md py-sm">Kondisi</th>
+</tr>
+</thead>
+<tbody class="text-xs">
+<tr class="border-b border-outline-variant/20 hover:bg-primary/5 transition-colors">
+<td class="px-md py-md font-bold text-primary">RVM-01</td>
+<td class="px-md py-md text-on-surface-variant">Fakultas Teknik</td>
+<td class="px-md py-md"><span class="px-2 py-0.5 bg-primary-container/20 text-primary-fixed rounded text-[10px]">Online</span></td>
+<td class="px-md py-md">
+<div class="relative w-8 h-8">
+<svg class="w-full h-full -rotate-90" viewBox="0 0 36 36">
+<circle cx="18" cy="18" fill="none" r="16" stroke="rgba(255,255,255,0.05)" stroke-width="4"></circle>
+<circle cx="18" cy="18" fill="none" r="16" stroke="#4edea3" stroke-dasharray="78 100" stroke-width="4"></circle>
+</svg>
+<span class="absolute inset-0 flex items-center justify-center text-[8px] font-bold font-label">78%</span>
+</div>
+</td>
+<td class="px-md py-md text-on-surface-variant"><span class="text-primary font-bold">620</span> / 800 botol</td>
+<td class="px-md py-md">
+<div class="flex items-center gap-xs">
+<span class="text-primary text-[10px]">Normal</span>
+<svg class="opacity-50" height="12" width="24"><path d="M0,6 L4,6 L6,2 L10,10 L12,6 L24,6" fill="none" stroke="#4edea3" stroke-width="1.5"></path></svg>
+</div>
+</td>
+</tr>
+<tr class="border-b border-outline-variant/20 hover:bg-primary/5 transition-colors">
+<td class="px-md py-md font-bold text-primary">RVM-02</td>
+<td class="px-md py-md text-on-surface-variant">Kantin Center</td>
+<td class="px-md py-md"><span class="px-2 py-0.5 bg-primary-container/20 text-primary-fixed rounded text-[10px]">Online</span></td>
+<td class="px-md py-md">
+<div class="relative w-8 h-8">
+<svg class="w-full h-full -rotate-90" viewBox="0 0 36 36">
+<circle cx="18" cy="18" fill="none" r="16" stroke="rgba(255,255,255,0.05)" stroke-width="4"></circle>
+<circle cx="18" cy="18" fill="none" r="16" stroke="#95d3ba" stroke-dasharray="45 100" stroke-width="4"></circle>
+</svg>
+<span class="absolute inset-0 flex items-center justify-center text-[8px] font-bold font-label">45%</span>
+</div>
+</td>
+<td class="px-md py-md text-on-surface-variant"><span class="text-primary font-bold">360</span> / 800 botol</td>
+<td class="px-md py-md">
+<div class="flex items-center gap-xs">
+<span class="text-primary text-[10px]">Normal</span>
+<svg class="opacity-50" height="12" width="24"><path d="M0,6 L4,6 L6,2 L10,10 L12,6 L24,6" fill="none" stroke="#4edea3" stroke-width="1.5"></path></svg>
+</div>
+</td>
+</tr>
+<tr class="hover:bg-primary/5 transition-colors">
+<td class="px-md py-md font-bold text-primary">RVM-03</td>
+<td class="px-md py-md text-on-surface-variant">Perpustakaan</td>
+<td class="px-md py-md"><span class="px-2 py-0.5 bg-error/20 text-error rounded text-[10px]">Penuh</span></td>
+<td class="px-md py-md">
+<div class="relative w-8 h-8">
+<svg class="w-full h-full -rotate-90" viewBox="0 0 36 36">
+<circle cx="18" cy="18" fill="none" r="16" stroke="rgba(255,255,255,0.05)" stroke-width="4"></circle>
+<circle cx="18" cy="18" fill="none" r="16" stroke="#ffb4ab" stroke-dasharray="100 100" stroke-width="4"></circle>
+</svg>
+<span class="absolute inset-0 flex items-center justify-center text-[8px] font-bold font-label">100%</span>
+</div>
+</td>
+<td class="px-md py-md text-on-surface-variant"><span class="text-error font-bold">800</span> / 800 botol</td>
+<td class="px-md py-md">
+<div class="flex items-center gap-xs">
+<span class="text-error text-[10px]">Penuh</span>
+<svg class="opacity-50" height="12" width="24"><path d="M0,6 L4,6 L6,0 L10,12 L12,6 L24,6" fill="none" stroke="#ffb4ab" stroke-width="1.5"></path></svg>
+</div>
+</td>
+</tr>
+<tr class="hover:bg-primary/5 transition-colors">
+<td class="px-md py-md font-bold text-primary">RVM-04</td>
+<td class="px-md py-md text-on-surface-variant">Food Court</td>
+<td class="px-md py-md"><span class="px-2 py-0.5 bg-orange-500/20 text-orange-400 rounded text-[10px]">Maintenance</span></td>
+<td class="px-md py-md">
+<div class="relative w-8 h-8">
+<svg class="w-full h-full -rotate-90" viewBox="0 0 36 36">
+<circle cx="18" cy="18" fill="none" r="16" stroke="rgba(255,255,255,0.05)" stroke-width="4"></circle>
+<circle cx="18" cy="18" fill="none" r="16" stroke="#fb923c" stroke-dasharray="0 100" stroke-width="4"></circle>
+</svg>
+<span class="absolute inset-0 flex items-center justify-center text-[8px] font-bold font-label">0%</span>
+</div>
+</td>
+<td class="px-md py-md text-on-surface-variant"><span class="text-orange-400 font-bold">0</span> / 800 botol</td>
+<td class="px-md py-md">
+<div class="flex items-center gap-xs">
+<span class="text-orange-400 text-[10px]">Maintenance</span>
+<svg class="opacity-50" height="12" width="24"><path d="M0,6 L24,6" fill="none" stroke="#fb923c" stroke-width="1.5"></path></svg>
+</div>
+</td>
+</tr></tbody>
+</table>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="mt-auto px-gutter py-md border-t border-outline-variant/30 flex justify-between items-center text-[10px] text-on-surface-variant opacity-50 uppercase tracking-widest font-label font-bold">
+<div class="flex items-center gap-sm">
+<span class="w-2 h-2 rounded-full bg-primary pulse-emerald"></span>
+<span class="">Sistem Online &amp; Terhubung</span>
+</div>
+<span class="">EARN System v1.0.0</span>
+<span class="">© 2025 Eco Action &amp; Reward Network</span>
+</footer>
+</div>
+<!-- Scripts -->
+<script>
+        // Smooth hover effect for glass panels
+        const glassPanels = document.querySelectorAll('.glass-panel');
+        glassPanels.forEach(panel => {
+            panel.addEventListener('mousemove', (e) => {
+                const rect = panel.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                panel.style.background = `radial-gradient(circle at ${x}px ${y}px, rgba(78, 222, 163, 0.05) 0%, rgba(26, 33, 30, 0.4) 50%)`;
+            });
+            panel.addEventListener('mouseleave', () => {
+                panel.style.background = 'rgba(26, 33, 30, 0.4)';
+            });
+        });
+    </script>
+
+
+
+
+
+
+</body></html>

@@ -1,32 +1,34 @@
 import type { Metadata } from "next";
-import { Inter, JetBrains_Mono, Hanken_Grotesk } from "next/font/google";
+import { Hanken_Grotesk, Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import MqttProvider from "@/components/MqttProvider";
 import Sidebar from "@/components/Sidebar";
-import Header from "@/components/Header";
 
 const hankenGrotesk = Hanken_Grotesk({
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
   variable: "--font-headline",
   display: "swap",
 });
 
 const inter = Inter({
   subsets: ["latin"],
+  weight: ["300", "400", "500", "600"],
   variable: "--font-sans",
   display: "swap",
 });
 
 const jetbrainsMono = JetBrains_Mono({
   subsets: ["latin"],
+  weight: ["500"],
   variable: "--font-mono",
   display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "Project EARN - Smart RVM Dashboard",
-  description: "Eco Action & Reward Network - Real-time Reverse Vending Machine Monitoring",
-  keywords: ["RVM", "Eco", "Reward", "MQTT", "IoT", "Dashboard"],
+  title: "EARN - Eco Action & Reward Dashboard",
+  description: "Eco Action & Reward Network - Real-time Reverse Vending Machine Monitoring Dashboard",
+  keywords: ["RVM", "Eco", "Reward", "MQTT", "IoT", "Dashboard", "EARN"],
 };
 
 export default function RootLayout({
@@ -35,21 +37,21 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="id" className={`${inter.variable} ${jetbrainsMono.variable} ${hankenGrotesk.variable}`}>
-      <body className="antialiased bg-[color:var(--surface-primary)] text-[color:var(--text-primary)]">
+    <html
+      lang="en"
+      className={`dark ${inter.variable} ${jetbrainsMono.variable} ${hankenGrotesk.variable}`}
+    >
+      <head>
+        {/* Material Symbols Outlined */}
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap"
+        />
+      </head>
+      <body className="font-body-md text-body-md antialiased">
         <MqttProvider>
-          <div className="flex min-h-screen h-screen overflow-hidden">
-            {/* Sidebar (Fixed width) */}
-            <div className="w-60 flex-shrink-0 border-r border-[color:var(--border-subtle)] bg-[color:var(--surface-secondary)]">
-              <Sidebar />
-            </div>
-            
-            {/* Main Content Area */}
-            <div className="flex-1 flex flex-col min-w-0 bg-[color:var(--surface-primary)]">
-              <Header />
-              {children}
-            </div>
-          </div>
+          <Sidebar />
+          {children}
         </MqttProvider>
       </body>
     </html>
