@@ -2,7 +2,6 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { useMqtt } from '@/components/MqttProvider';
-import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
 
 // ── Types ──────────────────────────────────────────────────────────────────────
@@ -65,8 +64,8 @@ const mesinStatusList: MesinStatus[] = [
 
 // ── Sub-Components ─────────────────────────────────────────────────────────────
 
-function StatCard({ label, value, unit, trend, icon }: {
-  label: string; value: string; unit: string; trend: string; icon: string;
+function StatCard({ label, value, unit, trend, icon, hoverBorder }: {
+  label: string; value: string; unit: string; trend: string; icon: string; hoverBorder: string;
 }) {
   const panelRef = useRef<HTMLDivElement>(null);
 
@@ -84,12 +83,13 @@ function StatCard({ label, value, unit, trend, icon }: {
   return (
     <div
       ref={panelRef}
-      className="glass-panel p-md rounded-2xl relative overflow-hidden hover:border-primary/20 transition-all group"
+      className={`glass-panel p-md rounded-2xl relative overflow-hidden transition-all group ${hoverBorder}`}
+      style={{ background: 'rgba(26, 33, 30, 0.4)' }}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
     >
       <div className="absolute -right-4 -bottom-4 opacity-10 group-hover:opacity-20 transition-opacity">
-        <span className="material-symbols-outlined text-[80px] text-primary">{icon}</span>
+        <span className={`material-symbols-outlined text-[80px] ${icon === 'stars' ? 'text-secondary' : icon === 'group' ? 'text-on-surface-variant' : 'text-primary'}`}>{icon}</span>
       </div>
       <p className="text-xs text-on-surface-variant uppercase font-label tracking-wider mb-sm">{label}</p>
       <div className="flex items-baseline gap-xs mb-xs">
@@ -105,9 +105,45 @@ function StatCard({ label, value, unit, trend, icon }: {
 }
 
 function LineChart() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [tooltipData, setTooltipData] = useState<{ x: number; time: string; value: string; show: boolean }>({ x: 0, time: '', value: '', show: false });
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const percentage = (x / rect.width) * 100;
+    
+    if (x >= 0 && x <= rect.width) {
+      const hours = Math.floor((percentage / 100) * 24);
+      const mins = Math.floor(((percentage / 100) * 24 % 1) * 60);
+      const timeStr = `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
+      const value = Math.floor(400 + (Math.sin(percentage / 10) * 300) + (percentage * 8));
+      
+      setTooltipData({
+        x,
+        time: timeStr,
+        value: value.toLocaleString('id-ID'),
+        show: true,
+      });
+    }
+  };
+
+  const handleMouseLeave = () => {
+    setTooltipData(prev => ({ ...prev, show: false }));
+  };
+
+  // calculate dynamic tooltip left position to avoid overflow
+  let tooltipLeft = tooltipData.x + 15;
+  if (containerRef.current) {
+    if (tooltipLeft + 100 > containerRef.current.getBoundingClientRect().width) {
+      tooltipLeft = tooltipData.x - 115; // move to left side of cursor
+    }
+  }
+
   return (
     <div className="relative h-64 w-full flex items-end">
-      {/* Gridlines */}
+      {/* Chart Gridlines */}
       <div className="absolute inset-0 flex flex-col justify-between text-[10px] text-on-surface-variant opacity-40">
         {['1.5K', '1.2K', '900', '600', '300', '0'].map((label) => (
           <div key={label} className={`w-full border-t ${label === '0' ? 'border-outline-variant' : 'border-dashed border-outline-variant/50'} flex justify-between items-start`}>
@@ -115,32 +151,39 @@ function LineChart() {
           </div>
         ))}
       </div>
-      {/* SVG Chart */}
-      <svg className="w-full h-full relative z-10" viewBox="0 0 100 100" preserveAspectRatio="none">
+      
+      {/* Smooth Data Path */}
+      <svg className="w-full h-full relative z-10" preserveAspectRatio="none" viewBox="0 0 1000 100">
         <defs>
           <linearGradient id="chartGradient" x1="0" x2="0" y1="0" y2="1">
-            <stop offset="0%" stopColor="#4edea3" />
+            <stop offset="0%" stopColor="#4edea3" stopOpacity="0.2" />
             <stop offset="100%" stopColor="transparent" />
           </linearGradient>
         </defs>
-        <path
-          d="M0,80 Q10,75 20,70 T40,40 T60,65 T80,30 T100,20"
-          fill="none"
-          stroke="#4edea3"
-          strokeWidth="2"
-          className="chart-line-glow"
-        />
-        <path
-          d="M0,80 Q10,75 20,70 T40,40 T60,65 T80,30 T100,20 L100,100 L0,100 Z"
-          fill="url(#chartGradient)"
-          opacity="0.1"
-        />
-        <circle cx="40" cy="40" r="3" fill="#ffffff" className="pulse-emerald" />
+        <path className="drop-shadow-[0_0_8px_rgba(78,222,163,0.5)]" d="M0,85 C50,80 100,88 150,80 C200,72 250,50 300,45 C350,40 400,60 450,55 C500,50 550,85 600,75 C650,65 700,20 750,25 C800,30 850,70 900,50 C950,30 1000,15 1000,15" fill="none" stroke="#4edea3" strokeWidth="2"></path>
+        <path d="M0,85 C50,80 100,88 150,80 C200,72 250,50 300,45 C350,40 400,60 450,55 C500,50 550,85 600,75 C650,65 700,20 750,25 C800,30 850,70 900,50 C950,30 1000,15 1000,15 L1000,100 L0,100 Z" fill="url(#chartGradient)"></path>
       </svg>
-      {/* Tooltip */}
-      <div className="absolute top-[30%] left-[38%] bg-surface-container-highest border border-primary/20 px-sm py-xs rounded-lg shadow-xl z-20">
-        <p className="text-[8px] text-on-surface-variant font-bold uppercase font-label">10:00</p>
-        <p className="text-[10px] text-primary"><span className="font-bold">1.024</span> botol</p>
+      
+      {/* Interactive Marker & Tooltip */}
+      <div 
+        ref={containerRef}
+        className="absolute inset-0 z-20 cursor-crosshair" 
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
+      >
+        <div className={`absolute top-0 bottom-0 w-[1px] bg-primary/30 pointer-events-none ${tooltipData.show ? '' : 'hidden'}`} style={{ left: tooltipData.x }}>
+          <div className="absolute top-0 -left-1 w-2 h-2 rounded-full bg-primary shadow-[0_0_10px_#4edea3]"></div>
+        </div>
+        <div 
+          className={`absolute pointer-events-none bg-surface-container-highest border border-primary/30 px-3 py-2 rounded-lg shadow-2xl backdrop-blur-md min-w-[100px] ${tooltipData.show ? '' : 'hidden'}`} 
+          style={{ left: tooltipLeft, top: '20px' }}
+        >
+          <div className="text-[10px] text-on-surface-variant font-bold uppercase font-label mb-1">{tooltipData.time}</div>
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-primary"></div>
+            <div className="text-xs text-primary font-bold"><span>{tooltipData.value}</span> <span className="font-normal opacity-70">botol</span></div>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -148,9 +191,9 @@ function LineChart() {
 
 function DonutChart() {
   const donutData = [
-    { label: 'RVM-01 (Fakultas Teknik)', botol: 620, persen: '49.7%', color: '#10b981', offset: 0 },
-    { label: 'RVM-02 (Kantin Center)', botol: 360, persen: '28.9%', color: '#84cc16', offset: -49.7 },
-    { label: 'RVM-03 (Perpustakaan)', botol: 200, persen: '16.1%', color: '#059669', offset: -78.6 },
+    { label: 'RVM-01 (Fakultas Teknik)', botol: 620, persen: '49.7%', color: '#10b981', bgRGB: 'rgb(16, 185, 129)', textColor: 'text-primary', offset: 0 },
+    { label: 'RVM-02 (Kantin Center)', botol: 360, persen: '28.9%', color: '#84cc16', bgRGB: 'rgb(132, 204, 22)', textColor: 'text-secondary', offset: -49.7 },
+    { label: 'RVM-03 (Perpustakaan)', botol: 200, persen: '16.1%', color: '#059669', bgRGB: 'rgb(5, 150, 105)', textColor: 'text-secondary-container', offset: -78.6 },
   ];
 
   return (
@@ -165,11 +208,12 @@ function DonutChart() {
 
       <div className="flex-1 flex flex-col items-center justify-center py-md">
         <div className="relative w-40 h-40">
-          <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
+          <svg className="w-full h-full -rotate-90 overflow-visible" viewBox="0 0 36 36">
             <circle cx="18" cy="18" r="15.9" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="4" />
             {donutData.map((d, i) => (
               <circle
                 key={i}
+                className="transition-all duration-300 origin-center cursor-pointer hover:scale-105 hover:stroke-[5px]"
                 cx="18" cy="18" r="15.9"
                 fill="none"
                 stroke={d.color}
@@ -180,7 +224,7 @@ function DonutChart() {
               />
             ))}
           </svg>
-          <div className="absolute inset-0 flex flex-col items-center justify-center">
+          <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
             <p className="text-[8px] text-on-surface-variant uppercase font-bold font-label">Total</p>
             <p className="text-2xl font-headline font-bold text-primary leading-none">1.247</p>
             <p className="text-[8px] text-on-surface-variant">botol</p>
@@ -199,14 +243,14 @@ function DonutChart() {
         {donutData.map((d, i) => (
           <div key={i} className="flex justify-between items-center text-[11px]">
             <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full" style={{ backgroundColor: d.color }} />
+              <span className={`w-2 h-2 rounded-full`} style={{ backgroundColor: d.bgRGB }} />
               <span className="text-on-surface">
                 {d.label.split(' ')[0]} <span className="opacity-50">({d.label.split('(')[1]?.replace(')', '') ?? ''})</span>
               </span>
             </div>
             <div className="flex gap-10">
               <span>{d.botol}</span>
-              <span className="font-bold" style={{ color: d.color }}>{d.persen}</span>
+              <span className={`font-bold ${d.textColor}`} style={{ color: d.bgRGB }}>{d.persen}</span>
             </div>
           </div>
         ))}
@@ -392,10 +436,10 @@ export default function AdminDashboard() {
       <main className="p-gutter flex flex-col gap-gutter">
         {/* ── KPI Cards ── */}
         <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-md" aria-label="KPI Cards">
-          <StatCard label="Total Botol Hari Ini" value="1.247" unit="botol" trend="18.4% dari kemarin" icon="recycling" />
-          <StatCard label="Total Poin Diberikan" value="12.470" unit="poin" trend="22.7% dari kemarin" icon="stars" />
-          <StatCard label="Pengguna Aktif" value="342" unit="orang" trend="15.3% dari kemarin" icon="group" />
-          <StatCard label="Sampah Berhasil Dikurangi" value="62.4" unit="kg" trend="20.1% dari kemarin" icon="eco" />
+          <StatCard label="Total Botol Hari Ini" value="1.247" unit="botol" trend="18.4% dari kemarin" icon="recycling" hoverBorder="hover:border-primary/20" />
+          <StatCard label="Total Poin Diberikan" value="12.470" unit="poin" trend="22.7% dari kemarin" icon="stars" hoverBorder="hover:border-secondary/20" />
+          <StatCard label="Pengguna Aktif" value="342" unit="orang" trend="15.3% dari kemarin" icon="group" hoverBorder="hover:border-primary/20" />
+          <StatCard label="Sampah Berhasil Dikurangi" value="62.4" unit="kg" trend="20.1% dari kemarin" icon="eco" hoverBorder="hover:border-primary/20" />
         </section>
 
         {/* ── Charts ── */}

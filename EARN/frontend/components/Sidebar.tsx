@@ -10,7 +10,7 @@ export default function Sidebar() {
   const navItems = [
     { name: 'Home', icon: 'home', href: '/' },
     { name: 'Mesin RVM', icon: 'sensors', href: '/mesin-rvm' },
-    { name: 'Transaksi', icon: 'receipt_long', href: '#' },
+    { name: 'Transaksi', icon: 'receipt_long', href: '/transaksi' },
     { name: 'Pengguna', icon: 'group', href: '/pengguna' },
     { name: 'Reward & Voucher', icon: 'card_giftcard', href: '#' },
     { name: 'Laporan', icon: 'bar_chart', href: '#' },
