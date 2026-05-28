@@ -17,7 +17,7 @@ Sistem memiliki 3 Frontend:
 3. **RVM UI (Customer Interact & Operator Login):** Python GUI (PyQt/Tkinter) berjalan di Raspberry Pi/NVIDIA Jetson.
 
 ## 4. Functional Requirements
-- **FR-01 (Autentikasi):** Customer dapat login via OTP/Gmail. Operator dapat login via QR Code di mesin RVM.
+- **FR-01 (Autentikasi):** Customer dapat login via OTP/Gmail. Operator dapat login via OTP Acak (diinput ke Web Dashboard) atau opsi fallback via Tombol Rahasia di layar mesin RVM.
 - **FR-02 (Transaksi Botol):** Mesin RVM mendeteksi botol, memvalidasi (Accept/Reject), dan memberikan poin jika valid.
 - **FR-03 (Manajemen RVM):** Sistem memantau status kesehatan mesin secara *real-time* (sensor suhu, laser penuh, ultrasonic, motor DC).
 - **FR-04 (Penugasan):** Admin dapat menugaskan mesin ke Operator untuk instalasi atau perbaikan.

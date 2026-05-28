@@ -3,6 +3,7 @@ import { Hanken_Grotesk, Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import MqttProvider from "@/components/MqttProvider";
 import Sidebar from "@/components/Sidebar";
+import { SidebarProvider } from "@/context/SidebarContext";
 
 const hankenGrotesk = Hanken_Grotesk({
   subsets: ["latin"],
@@ -49,10 +50,12 @@ export default function RootLayout({
         />
       </head>
       <body className="font-body-md text-body-md antialiased">
-        <MqttProvider>
-          <Sidebar />
-          {children}
-        </MqttProvider>
+        <SidebarProvider>
+          <MqttProvider>
+            <Sidebar />
+            {children}
+          </MqttProvider>
+        </SidebarProvider>
       </body>
     </html>
   );

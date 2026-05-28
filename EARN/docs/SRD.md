@@ -18,6 +18,8 @@
 1. Admin menugaskan mesin RVM baru kepada Operator via Web Dashboard.
 2. Operator memantau status penugasan via Web Dashboard.
 3. Operator tiba di lokasi mesin fisik.
-4. Operator login di RVM UI (Python GUI) menggunakan QR Code (memindai melalui kamera).
+4. Operator melakukan autentikasi *Maintenance*. Terdapat 2 opsi:
+   - **Remote (Web Dashboard):** Mesin RVM menampilkan kode OTP Acak, lalu Operator memasukkan kode tersebut ke Web Dashboard via laptop.
+   - **Lokal (Layar RVM):** Operator menekan *Tombol Rahasia* pada layar RVM untuk membuka menu Maintenance.
 5. Operator melakukan kalibrasi motor dan sensor secara langsung via UI (perintah diteruskan dari Python GUI ke ESP32 via UART).
 6. Operator memperbarui model AI (`best.pt`) dengan mengunduhnya dari GitHub Release langsung ke penyimpanan lokal *Edge Device*.

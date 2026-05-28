@@ -79,29 +79,29 @@ function RvmCard({ unit, onUpdateStatus }: { unit: RvmUnit, onUpdateStatus: (id:
   }
 
   // Calculate SVG stroke-dasharray (circumference is ~100 for r=15.9 -> 2*PI*15.9 = 99.9)
-  const dashVal = unit.kapasitas === 0 && unit.status !== 'Offline' && unit.status !== 'MAINTENANCE' 
-    ? 0 : unit.kapasitas; 
-    // Handle offline/maintenance display logic based on design
+  const dashVal = unit.kapasitas === 0 && unit.status !== 'Offline' && unit.status !== 'MAINTENANCE'
+    ? 0 : unit.kapasitas;
+  // Handle offline/maintenance display logic based on design
   const displayDash = (unit.status === 'Offline' || unit.status === 'MAINTENANCE') ? 0 : unit.kapasitas;
   const displayValue = unit.status === 'Offline' ? '-' : `${unit.kapasitas}%`;
 
   return (
-    <div 
+    <div
       ref={panelRef}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
-      className={`glass-panel rounded-xl flex items-center justify-between group ${hoverBorder} transition-all px-6 py-4 ${opacityClass} relative ${menuOpen ? 'z-50' : 'z-10'}`} 
+      className={`glass-panel rounded-xl flex items-center justify-between group ${hoverBorder} transition-all px-6 py-4 ${opacityClass} relative ${menuOpen ? 'z-50' : 'z-10'}`}
       style={{ background: 'rgba(26, 33, 30, 0.4)' }}
     >
       <div className="flex items-center gap-4">
         <div className="relative w-[80px] h-[80px] shrink-0">
           <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
             <circle cx="18" cy="18" fill="none" r="15.9" stroke="rgba(255,255,255,0.05)" strokeWidth="3"></circle>
-            <circle 
-              className="transition-all duration-1000" 
-              cx="18" cy="18" fill="none" r="15.9" 
-              stroke={hexColor} 
-              strokeDasharray={`${displayDash} 100`} 
+            <circle
+              className="transition-all duration-1000"
+              cx="18" cy="18" fill="none" r="15.9"
+              stroke={hexColor}
+              strokeDasharray={`${displayDash} 100`}
               strokeLinecap="round" strokeWidth="3"
             ></circle>
           </svg>
@@ -123,7 +123,7 @@ function RvmCard({ unit, onUpdateStatus }: { unit: RvmUnit, onUpdateStatus: (id:
         </div>
       </div>
       <div className="relative" ref={menuRef}>
-        <button 
+        <button
           onClick={() => setMenuOpen(!menuOpen)}
           className="text-on-surface-variant hover:text-primary transition-colors p-1"
         >
@@ -132,14 +132,14 @@ function RvmCard({ unit, onUpdateStatus }: { unit: RvmUnit, onUpdateStatus: (id:
         {menuOpen && (
           <div className="absolute right-0 top-full mt-1 w-32 bg-surface-container-high border border-outline-variant/30 rounded-lg shadow-xl z-50 overflow-hidden">
             <div className="flex flex-col">
-              <Link 
+              <Link
                 href={`/mesin-rvm/${unit.id}`}
                 className="flex items-center gap-2 px-3 py-2 text-xs font-medium text-on-surface hover:bg-primary/10 hover:text-primary transition-colors text-left"
               >
                 <span className="material-symbols-outlined text-sm">visibility</span>
                 Lihat
               </Link>
-              <button 
+              <button
                 onClick={() => {
                   onUpdateStatus(unit.id, 'MAINTENANCE');
                   setMenuOpen(false);
@@ -171,11 +171,11 @@ export default function MesinRvmPage() {
   };
 
   return (
-    <div className="ml-64 flex flex-col min-h-screen relative overflow-hidden bg-background">
+    <div className="md:ml-64 flex flex-col min-h-screen relative bg-background">
       {/* Background Decorative Elements */}
       <div className="fixed top-[-20%] right-[-10%] w-[600px] h-[600px] bg-primary/5 rounded-full blur-[120px] pointer-events-none z-[-1]"></div>
       <div className="fixed bottom-[-10%] left-[15%] w-[400px] h-[400px] bg-secondary-container/10 rounded-full blur-[100px] pointer-events-none z-[-1]"></div>
-      
+
       <style>{`
         @keyframes blink {
           0%, 100% { opacity: 1; transform: scale(1); }
@@ -197,47 +197,21 @@ export default function MesinRvmPage() {
         }
       `}</style>
 
-      {/* TopAppBar */}
-      <header className="h-20 bg-background/50 backdrop-blur-md sticky top-0 z-40 flex justify-between items-center px-8 border-b border-outline-variant/30">
-        <div className="flex flex-col">
-          <div className="flex items-center gap-2">
-            <h2 className="font-headline text-2xl font-bold text-primary">RVM Network</h2>
-            <span className="material-symbols-outlined text-primary text-sm">sensors</span>
-          </div>
-          <p className="text-xs text-on-surface-variant">Monitoring Real-time Unit Mesin RVM</p>
-        </div>
-        
-        <div className="flex items-center gap-6">
-          <div className="hidden md:flex items-center gap-3">
-            <div className="flex items-center gap-1 px-3 py-2 bg-surface-container rounded-lg border border-outline-variant/30 cursor-pointer hover:border-primary/40 transition-all">
+      {/* TopAppBar — Shared Sticky Navbar */}
+      <Header
+        title="Mesin RVM"
+        subtitle="Monitoring Real-time Unit Mesin RVM"
+        icon="sensors"
+        rightExtra={
+          <div className="hidden md:flex items-center gap-sm">
+            <div className="flex items-center gap-xs px-sm py-2 bg-surface-container rounded-lg border border-outline-variant/30 cursor-pointer hover:border-primary/40 transition-all">
               <span className="material-symbols-outlined text-sm">filter_alt</span>
               <span className="text-xs">Semua Lokasi</span>
               <span className="material-symbols-outlined text-sm">expand_more</span>
             </div>
           </div>
-          <div className="h-8 w-[1px] bg-white/10 mx-1"></div>
-          
-          <div className="flex items-center gap-4">
-            <div className="relative">
-              <span className="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors cursor-pointer">notifications</span>
-              <span className="absolute -top-1 -right-1 w-3 h-3 bg-error rounded-full border-2 border-background flex items-center justify-center text-[8px] font-bold">3</span>
-            </div>
-            <div className="relative flex items-center justify-center">
-              <span className="material-symbols-outlined text-on-surface-variant hover:text-primary-fixed cursor-pointer transition-colors">light_mode</span>
-            </div>
-            <div className="relative flex items-center justify-center">
-              <span className="material-symbols-outlined text-on-surface-variant hover:text-primary-fixed cursor-pointer transition-colors">settings</span>
-            </div>
-            <div className="flex items-center gap-3 bg-surface-container pl-3 pr-1 py-1 rounded-full border border-outline-variant/30">
-              <div className="text-right hidden sm:block">
-                <p className="text-[12px] font-bold text-primary">Admin</p>
-                <p className="text-[10px] text-on-surface-variant leading-none">Super Admin</p>
-              </div>
-              <img alt="Admin avatar" className="w-8 h-8 rounded-full border border-primary/20" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDgODpEKbz6oZBhVOmiLYpZI1hxCuC09c-L6Jy2AIuIcPvVFgiYqsBaWJ3o1zY3QT3fAf1B3Qhgk_iAc0gQ1FunscmSPTYZXgAiiGkMV9kRPU1OZEPEj3IfeK245TA3jVfr-SYV3-NolFGzC3Zj4OhRwcX6zDYP0cKsDpcCQeXG4GM3iNZ8jHk7vhSQ1VwvBvsSdPQo3fPgJyGOHqD_vvja_SCCsjhCnH_zRoGKS0RYcO8Vid1BN7aTjDEnIX15nPIyuoOHMAqvrNU" />
-            </div>
-          </div>
-        </div>
-      </header>
+        }
+      />
 
       {/* Main Content Area */}
       <main className="p-6">

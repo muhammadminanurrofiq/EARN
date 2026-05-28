@@ -430,8 +430,8 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="ml-64 flex flex-col min-h-screen">
-      <Header />
+    <div className="md:ml-64 flex flex-col min-h-screen">
+      <Header title="Home" subtitle="Dashboard Monitoring Sistem EARN" icon="eco" />
 
       <main className="p-gutter flex flex-col gap-gutter">
         {/* ── KPI Cards ── */}

@@ -104,3 +104,42 @@ body {
     scroll-behavior: auto !important;
   }
 }
+
+/* ── Mockup Styles integration ── */
+.organic-glow:hover {
+  box-shadow: 0 0 20px rgba(78, 222, 163, 0.15);
+  border-color: rgba(78, 222, 163, 0.4);
+}
+
+.active-stem {
+  position: relative;
+}
+.active-stem::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 25%;
+  height: 50%;
+  width: 4px;
+  background-color: #4edea3;
+  border-radius: 0 4px 4px 0;
+}
+
+.dropdown-menu {
+  display: none;
+  position: absolute;
+  right: 0;
+  top: 100%;
+  z-index: 100;
+  min-width: 160px;
+  animation: fadeIn 0.2s ease-out;
+}
+.dropdown-menu.show {
+  display: block;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+

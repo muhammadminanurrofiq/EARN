@@ -33,5 +33,21 @@
 
 - **2026-05-26 17:00:00** - Implementasi Halaman Detail Unit RVM. - *Handoff: Membangun rute dinamis `/mesin-rvm/[id]/page.tsx` untuk menampilkan telemetri mesin spesifik (kapasitas, suhu, log aktivitas, grafik) dan menghubungkan opsi "Lihat" di kartu RVM ke URL dinamis tersebut menggunakan komponen `Link` Next.js.*
 
+- **2026-05-28 10:48:00** - Pembuatan skrip otomatisasi, konfigurasi hot-reloading, serta panduan lengkap cara menjalankan website. - *Handoff: Lingkungan development kini mendukung mode Docker Dev dengan hot-reloading (via volume mounting) dan Hybrid Dev (Docker DB/MQTT + Local Node/Next.js). Pengguna dapat menjalankan file `run-dev.bat`, `run-dev.ps1`, atau `run-dev.sh` (untuk WSL/Linux) untuk memulai/mengelola alur kerja. Panduan lengkap telah dibuat di `docs/PANDUAN_JALANKAN_WEB.md`.*
+
+- **2026-05-28 11:25:00** - Refaktorisasi Sticky Navbar Konsisten di seluruh halaman menu. - *Handoff: Komponen `Header.tsx` di-refaktor menjadi reusable dengan props (`title`, `subtitle`, `icon`, `leftExtra`, `rightExtra`). Halaman Home, Mesin RVM, Transaksi, dan Pengguna kini menggunakan komponen Header yang sama sebagai sticky navbar. Inline header custom di masing-masing halaman telah dihapus dan digantikan oleh komponen bersama.*
+
+- **2026-05-28 11:37:00** - Implementasi Layout Mobile Responsive & Sidebar Toggle. - *Handoff: Membuat `SidebarContext` untuk mengelola state global sidebar. Menambahkan tombol Hamburger di Header khusus tampilan mobile. Sidebar sekarang menggunakan teknik off-canvas (drawer) yang tersembunyi dengan `-translate-x-full` di mobile dan ditutupi oleh *backdrop* blur saat terbuka. Semua halaman (Home, Mesin RVM, Transaksi, Pengguna) diubah class marginnya dari `ml-64` menjadi `md:ml-64` agar lebar layar penuh digunakan pada smartphone.*
+
+- **2026-05-28 12:25:00** - Pembaruan UI Halaman Pengguna sesuai Mockup Stitch Refined Header & Actions. - *Handoff: Halaman Pengguna (`/pengguna`) telah diselaraskan dengan mockup terbaru dari Stitch. Dropdown menu (tiga titik) di setiap kartu pengguna kini dikelola dengan state induk (`activeDropdownIdx`) untuk menjamin hanya ada satu dropdown yang terbuka dalam satu waktu dan menutup otomatis ketika area luar diklik. Animasi transisi dropdown dan organic glow hover juga telah disesuaikan di `globals.css`.*
+
+- **2026-05-28 12:57:00** - Implementasi Webpack Watch Options Polling di Next.js Config. - *Handoff: Mengaktifkan polling (`poll: 800`) pada Webpack di file `next.config.mjs` ketika mode pengembangan aktif. Perubahan ini untuk mengatasi keterbatasan bawaan WSL2 yang tidak mendeteksi event inotify untuk file mount yang diedit dari sistem operasi host (Windows). Dengan ini, hot-reloading Next.js akan bekerja secara instan di dalam WSL meskipun file berada di drive `/mnt/c/`.*
+
+- **2026-05-28 13:30:00** - Pembersihan opsi Hybrid Dev Mode demi konsistensi Dockerize penuh sesuai SDD.md. - *Handoff: Menghapus opsi Hybrid Dev Mode dari run-dev.sh, run-dev.bat, dan run-dev.ps1 serta memperbarui docs/PANDUAN_JALANKAN_WEB.md. Seluruh environment pengembangan lokal sekarang dikunci 100% menggunakan kontainer Docker di port 3000.*
+
+- **2026-05-28 17:05:00** - Penyesuaian Seluruh Dokumen Arsitektur dengan Flowchart Sistem. - *Handoff: Memperbarui `SRS.md`, `SRD.md`, `SDD.md`, dan `STD.md` untuk mengakomodasi perubahan metode login Maintenance bagi Operator (menggunakan OTP Acak via Web Dashboard dan opsi fallback Tombol Rahasia lokal, menggantikan metode lama scan QR Code).*
+
 ---
 *(Entri log selanjutnya akan ditambahkan di atas garis ini)*
+
+

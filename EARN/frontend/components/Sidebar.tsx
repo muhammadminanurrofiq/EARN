@@ -3,9 +3,11 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useSidebar } from '@/context/SidebarContext';
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const { isSidebarOpen, closeSidebar } = useSidebar();
 
   const navItems = [
     { name: 'Home', icon: 'home', href: '/' },
@@ -18,7 +20,17 @@ export default function Sidebar() {
   ];
 
   return (
-    <aside className="h-screen w-64 fixed left-0 top-0 bg-surface-container-lowest border-r border-outline-variant/30 flex flex-col z-50">
+    <>
+      {/* Mobile Backdrop */}
+      {isSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-background/80 backdrop-blur-sm z-40 md:hidden"
+          onClick={closeSidebar}
+        />
+      )}
+
+      {/* Sidebar */}
+      <aside className={`h-screen w-64 fixed left-0 top-0 bg-surface-container-lowest border-r border-outline-variant/30 flex flex-col z-50 transition-transform duration-300 ease-in-out ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}>
       {/* Logo */}
       <div className="p-md">
         <div className="flex items-center gap-base mb-base">
@@ -42,15 +54,15 @@ export default function Sidebar() {
             <Link
               key={item.name}
               href={item.href}
-              className={`flex items-center gap-sm px-md py-sm rounded-lg transition-all ${
+              className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all group ${
                 isActive
-                  ? 'text-primary sidebar-active'
-                  : 'text-on-surface-variant hover:bg-white/5'
+                  ? 'bg-primary/10 text-primary border border-primary/20'
+                  : 'text-on-surface-variant hover:bg-surface-container-high hover:text-primary border border-transparent'
               }`}
               aria-current={isActive ? 'page' : undefined}
             >
-              <span className="material-symbols-outlined">{item.icon}</span>
-              <span className="font-body-md font-medium">{item.name}</span>
+              <span className="material-symbols-outlined text-2xl">{item.icon}</span>
+              <span className="font-label-md">{item.name}</span>
             </Link>
           );
         })}
@@ -82,5 +94,6 @@ export default function Sidebar() {
         </div>
       </div>
     </aside>
+    </>
   );
 }

@@ -12,3 +12,4 @@
 ### 1.2 System Test (End-to-End)
 - Simulasi kamera mendeteksi botol PET $\rightarrow$ Logika AI $\rightarrow$ Aktuasi Stepper $\rightarrow$ Pengiriman Data MQTT $\rightarrow$ Penerimaan *real-time* di Dashboard Web & Mobile App.
 - Pengujian beban (*Load Test*) pada Mosquitto MQTT Broker dengan ratusan simulasi mesin RVM yang mengirimkan data sensor (suhu, ultrasonik) setiap detik.
+- Pengujian alur Autentikasi Maintenance: Validasi kesesuaian OTP Acak (Web Dashboard) dan respons akses *Tombol Rahasia* secara lokal.

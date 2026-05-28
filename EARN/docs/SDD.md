@@ -24,3 +24,8 @@ Tabel Utama:
 - **RVM_Machines:** `id_mesin` (PK), `lokasi`, `status` (Online/Penuh/Maintenance), `suhu`, `kapasitas_maks`, `kapasitas_saat_ini`.
 - **Assignments:** `id_tugas` (PK), `id_mesin` (FK), `id_operator` (FK), `jenis_tugas` (Instalasi/Maintenance), `status`.
 - **Transactions:** `id_transaksi` (PK), `id_user` (FK), `id_mesin` (FK), `poin_didapat`, `timestamp`.
+
+## 4. Mekanisme Maintenance & Autentikasi Operator
+Sistem mendukung alur *Maintenance* ganda untuk memfasilitasi kebutuhan Operator di lapangan (berdasarkan Topologi Sistem):
+- **Remote (Web Dashboard):** RVM men-generate OTP Acak yang divalidasi oleh sistem via input Operator di Dashboard (memanfaatkan alur komunikasi MQTT/DB).
+- **Lokal (RVM GUI):** Opsi *fallback* tanpa bergantung koneksi server, melalui *Tombol Rahasia* di layar sentuh RVM.

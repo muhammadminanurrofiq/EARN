@@ -1,21 +1,60 @@
 "use client";
 
 import React from 'react';
+import { useSidebar } from '@/context/SidebarContext';
 
-export default function Header() {
+interface HeaderProps {
+  /** Judul halaman yang tampil di kiri header */
+  title: string;
+  /** Deskripsi singkat di bawah judul */
+  subtitle: string;
+  /** Nama icon Material Symbols Outlined yang tampil di samping judul */
+  icon?: string;
+  /** Elemen kustom tambahan di sisi kiri (contoh: navigasi tab, filter) */
+  leftExtra?: React.ReactNode;
+  /** Elemen kustom tambahan di sisi kanan (contoh: search bar, tombol tambah) */
+  rightExtra?: React.ReactNode;
+}
+
+export default function Header({ title, subtitle, icon = 'eco', leftExtra, rightExtra }: HeaderProps) {
+  const { toggleSidebar } = useSidebar();
+
   return (
-    <header className="h-20 bg-background/50 backdrop-blur-md sticky top-0 z-40 flex justify-between items-center px-gutter border-b border-outline-variant/30">
-      {/* Title */}
-      <div className="flex flex-col">
-        <div className="flex items-center gap-sm">
-          <h2 className="font-headline text-2xl font-bold text-primary">Home</h2>
-          <span className="material-symbols-outlined text-primary text-sm">eco</span>
+    <header
+      id="sticky-navbar"
+      className="h-20 bg-background/50 backdrop-blur-md sticky top-0 z-40 flex justify-between items-center px-4 md:px-gutter border-b border-outline-variant/30"
+    >
+      {/* Left: Title + Extra */}
+      <div className="flex items-center gap-3 md:gap-6">
+        <button 
+          onClick={toggleSidebar}
+          className="md:hidden p-2 -ml-2 text-on-surface-variant hover:text-primary transition-colors flex items-center justify-center"
+          aria-label="Toggle Menu"
+        >
+          <span className="material-symbols-outlined">menu</span>
+        </button>
+        <div className="flex flex-col">
+          <div className="flex items-center gap-sm">
+            <h2 className="font-headline text-lg md:text-2xl font-bold text-primary truncate max-w-[150px] sm:max-w-none">{title}</h2>
+            <span className="material-symbols-outlined text-primary text-sm hidden sm:block">{icon}</span>
+          </div>
+          <p className="text-[10px] md:text-xs text-on-surface-variant truncate max-w-[200px] sm:max-w-none">{subtitle}</p>
         </div>
-        <p className="text-xs text-on-surface-variant">Dashboard Monitoring Sistem EARN</p>
+        {leftExtra && (
+          <>
+            <div className="h-6 w-[1px] bg-outline-variant/30 hidden md:block" />
+            {leftExtra}
+          </>
+        )}
       </div>
 
       {/* Right Controls */}
-      <div className="flex items-center gap-md">
+      <div className="flex items-center gap-3 md:gap-md">
+        {/* Right Extra (search bar, buttons, etc.) */}
+        <div className="hidden md:block">
+          {rightExtra}
+        </div>
+
         {/* Date Selector */}
         <div className="hidden md:flex items-center gap-sm">
           <div className="flex items-center gap-xs px-sm py-2 bg-surface-container rounded-lg border border-outline-variant/30 cursor-pointer hover:border-primary/40 transition-all">
@@ -63,7 +102,7 @@ export default function Header() {
 
           {/* Profile */}
           <div className="flex items-center gap-sm bg-surface-container pl-sm pr-xs py-xs rounded-full border border-outline-variant/30">
-            <div className="text-right">
+            <div className="text-right hidden sm:block">
               <p className="text-[12px] font-bold text-primary">Admin</p>
               <p className="text-[10px] text-on-surface-variant leading-none">Super Admin</p>
             </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useRef, useState, useEffect } from 'react';
+import Header from '@/components/Header';
 
 function InteractiveChart({ children, chartId, tooltipUnit = "botol", baseValue = 800, volatility = 500 }: { children: React.ReactNode, chartId: string, tooltipUnit?: string, baseValue?: number, volatility?: number }) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -118,7 +119,7 @@ function InteractiveChart({ children, chartId, tooltipUnit = "botol", baseValue 
 
 export default function TransaksiPage() {
   return (
-    <div className="ml-64 flex flex-col min-h-screen relative overflow-hidden">
+    <div className="md:ml-64 flex flex-col min-h-screen relative">
       {/* Background Decorative Elements */}
       <div className="fixed top-[-20%] right-[-10%] w-[600px] h-[600px] bg-primary/5 rounded-full blur-[120px] pointer-events-none z-[-1]"></div>
       <div className="fixed bottom-[-10%] left-[15%] w-[400px] h-[400px] bg-secondary-container/10 rounded-full blur-[100px] pointer-events-none z-[-1]"></div>
@@ -143,34 +144,24 @@ export default function TransaksiPage() {
         }
       `}</style>
 
-      {/* TopAppBar */}
-      <header className="h-20 w-full sticky top-0 z-40 bg-surface/80 backdrop-blur-xl border-b border-outline-variant/10 px-8 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <h2 className="font-headline-lg text-2xl font-bold text-primary tracking-tight">Transaksi</h2>
-          <div className="h-6 w-[1px] bg-outline-variant/30 ml-2 mr-2"></div>
+      {/* TopAppBar — Shared Sticky Navbar */}
+      <Header
+        title="Transaksi"
+        subtitle="Monitoring Transaksi Botol & Voucher"
+        icon="receipt_long"
+        leftExtra={
           <nav className="flex gap-6">
             <a className="text-primary font-bold text-sm" href="#">Real-time Feed</a>
             <a className="text-on-surface-variant hover:text-on-surface transition-colors text-sm" href="#">Archive</a>
           </nav>
-        </div>
-        <div className="flex items-center gap-6">
+        }
+        rightExtra={
           <div className="relative group">
             <span className="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-on-surface-variant text-sm">search</span>
             <input className="bg-surface-container-lowest border-none rounded-full pl-10 pr-4 py-2 w-64 text-sm focus:ring-1 focus:ring-primary focus:outline-none transition-all" placeholder="Cari transaksi..." type="text"/>
           </div>
-          <div className="flex items-center gap-3">
-            <button className="p-2 text-on-surface-variant hover:bg-surface-container-high rounded-full transition-all">
-              <span className="material-symbols-outlined">notifications</span>
-            </button>
-            <button className="p-2 text-on-surface-variant hover:bg-surface-container-high rounded-full transition-all">
-              <span className="material-symbols-outlined">settings</span>
-            </button>
-            <div className="w-10 h-10 rounded-full border-2 border-primary overflow-hidden ml-2">
-              <img alt="User profile" className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuApwH78humvKdlfIyE5RAGD_MmvXRTlHHO2NjCnBaYMmkiyVszXghcfwUb-5oP3RjpTm5-C6Ymxkld3cmfi2LHmie4lrolBD1GI9yNnO1izIZR21tjlpO77kN6HEI5MdDsqS3xbwrK8dkT9f0vycFdmWoOogfwMYl45yyKZoeq39niamdv2u20wR-hdvh51TCqvnumc1vEt6i-p8jyKEBKdsQWPjosdOc39zfjjQhYD-gD3Z01XABDjIqfQp2Bct4chsS-sxW-46q8"/>
-            </div>
-          </div>
-        </div>
-      </header>
+        }
+      />
 
       {/* Page Content */}
       <main className="p-6 grid grid-cols-1 lg:grid-cols-2 gap-8 h-[calc(100vh-80px)] overflow-hidden">
