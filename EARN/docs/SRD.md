@@ -23,3 +23,13 @@
    - **Lokal (Layar RVM):** Operator menekan *Tombol Rahasia* pada layar RVM untuk membuka menu Maintenance.
 5. Operator melakukan kalibrasi motor dan sensor secara langsung via UI (perintah diteruskan dari Python GUI ke ESP32 via UART).
 6. Operator memperbarui model AI (`best.pt`) dengan mengunduhnya dari GitHub Release langsung ke penyimpanan lokal *Edge Device*.
+
+## 3. Alur Interaksi Web Dashboard (Manajemen RVM)
+1. Super Admin/Admin mengakses menu `/mesin-rvm`.
+2. Dashboard menampilkan *grid* daftar kartu mesin RVM dengan status *real-time* (Online/Offline/Penuh/Maintenance) berbentuk grafik cincin (Donut Chart) mini.
+3. Admin menekan tombol opsi (titik tiga) pada kartu dan memilih aksi **Maintenance**.
+4. Sistem membuka *Maintenance Modal* (Popup) dengan latar transparan yang disesuaikan tingkat efek *blur*-nya.
+   - Menampilkan *Live Feed* Kamera.
+   - Menampilkan telemetri sensor (Kapasitas, Kelembaban, Suhu).
+   - Menyediakan panel *System Logs* langsung dari RVM.
+   - Menawarkan kontrol aksi seperti *Save Reactivate* dan *Save as Draft*.

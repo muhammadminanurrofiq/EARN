@@ -9,6 +9,10 @@ export default function Sidebar() {
   const pathname = usePathname();
   const { isSidebarOpen, closeSidebar } = useSidebar();
 
+  // Sembunyikan sidebar di halaman detail mesin RVM
+  const isRvmDetail = pathname.startsWith('/mesin-rvm/') && pathname.split('/').length > 2;
+  if (isRvmDetail) return null;
+
   const navItems = [
     { name: 'Home', icon: 'home', href: '/' },
     { name: 'Mesin RVM', icon: 'sensors', href: '/mesin-rvm' },

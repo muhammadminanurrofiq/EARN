@@ -21,3 +21,7 @@ Sistem memiliki 3 Frontend:
 - **FR-02 (Transaksi Botol):** Mesin RVM mendeteksi botol, memvalidasi (Accept/Reject), dan memberikan poin jika valid.
 - **FR-03 (Manajemen RVM):** Sistem memantau status kesehatan mesin secara *real-time* (sensor suhu, laser penuh, ultrasonic, motor DC).
 - **FR-04 (Penugasan):** Admin dapat menugaskan mesin ke Operator untuk instalasi atau perbaikan.
+
+## 5. Non-Functional Requirements (UI/UX)
+- **NFR-01 (Estetika & Ergonomi):** Web Dashboard wajib menerapkan prinsip *Bio-Digital Minimalism* (palet HSL, tipografi modern, animasi mikro *easing* natural).
+- **NFR-02 (Aksesibilitas):** Modal/popup interaktif (seperti menu Maintenance) harus memiliki fokus yang jelas, memisahkan lapisan konten (*layering*) dengan efek *backdrop blur* yang diukur secara ergonomis untuk mencegah *cognitive overload* dan menjaga konteks visual.

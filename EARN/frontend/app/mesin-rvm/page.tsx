@@ -26,7 +26,147 @@ const rvmUnits: RvmUnit[] = [
 
 // ── Sub-Components ─────────────────────────────────────────────────────────────
 
-function RvmCard({ unit, onUpdateStatus }: { unit: RvmUnit, onUpdateStatus: (id: string, status: RvmStatus) => void }) {
+function MaintenanceModal({ unit, onClose, onUpdateStatus }: { unit: RvmUnit, onClose: () => void, onUpdateStatus: (id: string, status: RvmStatus) => void }) {
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isFlashing, setIsFlashing] = useState(false);
+  const [captureText, setCaptureText] = useState('Ambil Gambar');
+
+  const handleCapture = () => {
+    setCaptureText('Capturing...');
+    setIsFlashing(true);
+    setTimeout(() => {
+      setIsFlashing(false);
+      setTimeout(() => {
+        setCaptureText('Ambil Gambar');
+      }, 500);
+    }, 100);
+  };
+
+  if (!unit) return null;
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm p-lg transition-opacity duration-300">
+      <div className={`glass-panel w-full ${isFullscreen ? 'max-w-[95vw] h-[95vh]' : 'max-w-6xl h-[85vh]'} rounded-xl border border-primary/20 flex flex-col shadow-2xl overflow-hidden relative transition-all duration-300`}>
+        {/* Modal Header */}
+        <div className="flex items-center justify-between p-md border-b border-outline-variant/30">
+          <div className="flex items-center gap-sm">
+            <span className="material-symbols-outlined text-primary">engineering</span>
+            <h3 className="font-headline text-xl font-bold text-primary">Maintenance Mode - {unit.id}</h3>
+          </div>
+          <div className="flex items-center gap-sm">
+            <button onClick={() => setIsFullscreen(!isFullscreen)} className="p-2 hover:bg-white/5 rounded-lg text-on-surface-variant transition-colors">
+              <span className="material-symbols-outlined">{isFullscreen ? 'fullscreen_exit' : 'fullscreen'}</span>
+            </button>
+            <button onClick={onClose} className="p-2 hover:bg-error/10 rounded-lg text-on-surface-variant hover:text-error transition-colors">
+              <span className="material-symbols-outlined">close</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Modal Content Scrollable */}
+        <div className="flex-1 overflow-y-auto p-md space-y-md">
+          {/* Top Row */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-md">
+            <div className="lg:col-span-4 bg-surface-container/50 rounded-xl p-md border border-outline-variant/20 flex flex-col items-center justify-center">
+              <h4 className="font-label text-xs uppercase tracking-widest text-on-surface-variant mb-md">Kapasitas Penyimpanan</h4>
+              <div className="relative w-40 h-40">
+                <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
+                  <circle cx="18" cy="18" fill="none" r="15.9" stroke="rgba(255,255,255,0.05)" strokeWidth="2.5"></circle>
+                  <circle cx="18" cy="18" fill="none" r="15.9" stroke="#f59e0b" strokeDasharray={`${unit.kapasitas} 100`} strokeLinecap="round" strokeWidth="2.5"></circle>
+                </svg>
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <span className="text-2xl font-headline font-bold text-primary">{unit.kapasitas}%</span>
+                  <span className="text-[9px] text-on-surface-variant font-label uppercase">{unit.kapasitas >= 80 ? 'Penuh' : 'Aman'}</span>
+                </div>
+              </div>
+              <div className="mt-sm text-center">
+                <p className="text-[11px] text-on-surface-variant">Sisa ruang: ~{Math.floor(((100 - unit.kapasitas) / 100) * 800)} botol</p>
+              </div>
+            </div>
+            <div className="lg:col-span-3 flex flex-col gap-md">
+              <div className="flex-1 bg-surface-container/50 rounded-xl p-md border border-outline-variant/20 flex flex-col items-center justify-center text-center">
+                <span className="material-symbols-outlined text-primary mb-2">humidity_mid</span>
+                <p className="text-[10px] font-label uppercase tracking-widest text-on-surface-variant mb-1">Kelembaban</p>
+                <p className="text-xl font-headline font-bold text-primary">92%</p>
+                <p className="text-[9px] text-secondary font-medium mt-1">Normal Pressure</p>
+              </div>
+              <div className="flex-1 bg-surface-container/50 rounded-xl p-md border border-outline-variant/20 flex flex-col items-center justify-center text-center">
+                <span className="material-symbols-outlined text-primary mb-2">thermostat</span>
+                <p className="text-[10px] font-label uppercase tracking-widest text-on-surface-variant mb-1">Suhu Internal</p>
+                <p className="text-xl font-headline font-bold text-primary">24°C</p>
+                <p className="text-[9px] text-secondary font-medium mt-1">Optimal Range</p>
+              </div>
+            </div>
+            <div className="lg:col-span-5 bg-surface-container/50 rounded-xl border border-outline-variant/20 flex flex-col overflow-hidden">
+              <div className="relative aspect-video">
+                <img alt="RVM Live Feed" className="w-full h-full object-cover grayscale-[0.2] brightness-75" src="https://lh3.googleusercontent.com/aida/ADBb0uiebtWC8SeJx2e6QOI86dM8HjLwqVm0SeP4efOvAHaYsICDvJ6hh1raC6aX0cmtj8kpQ_PmOUUHmtIvttebOzHgcnpP9H-VsXzXQMXieo17bn2sh96bXnQr9yKkd8-cJz6nh_sp7wZqsmsh7N4fd6PuMfa7_BTkyg382IfMtTUJ4QI3V84T73jOj5i_ietMXlXTuA1CNpRwRRnPpUFClodv32tbMADDUbS0NvHOs82f0Z1AucbbHnZsEA"/>
+                <div className={`absolute inset-0 bg-white pointer-events-none transition-opacity duration-100 ${isFlashing ? 'opacity-100' : 'opacity-0'}`}></div>
+                <div className="absolute top-3 left-3 flex items-center gap-2 bg-black/60 px-2 py-1 rounded text-[10px] font-bold text-error uppercase tracking-tighter border border-error/50">
+                  <span className="w-1.5 h-1.5 bg-error rounded-full status-blink"></span> Live Feed
+                </div>
+              </div>
+              <div className="p-sm bg-surface-container-high/80 flex items-center justify-center">
+                <button onClick={handleCapture} className="flex items-center gap-2 bg-primary/10 hover:bg-primary/20 text-primary px-4 py-2 rounded-lg text-xs font-bold transition-all border border-primary/20">
+                  <span className="material-symbols-outlined text-sm">photo_camera</span>
+                  <span className="">{captureText}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom Row */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-md">
+            {/* System Logs */}
+            <div className="bg-surface-container/50 rounded-xl p-md border border-outline-variant/20 flex flex-col h-64">
+              <h4 className="font-label text-xs uppercase tracking-widest text-on-surface-variant mb-sm">System Logs</h4>
+              <div className="flex-1 overflow-y-auto space-y-2 font-label text-[11px] text-on-surface-variant/80">
+                <div className="flex gap-2"><span className="text-primary">[14:20]</span> <span className="">Sensor 01 (Ultrasonic) Calibrated - OK</span></div>
+                <div className="flex gap-2"><span className="text-primary">[14:25]</span> <span className="">Connectivity Check - Signal Strength 85%</span></div>
+                <div className="flex gap-2"><span className="text-primary">[14:30]</span> <span className="">Internal Temp: 24.5°C - Normal</span></div>
+                <div className="flex gap-2"><span className="text-primary">[14:32]</span> <span className="">User Session Started - ID 0x4f2</span></div>
+                <div className="flex gap-2"><span className="text-primary">[14:35]</span> <span className="">Compactor Cycle Completed</span></div>
+                <div className="flex gap-2"><span className="text-primary">[14:40]</span> <span className="">Door Lock Status: Verified Secure</span></div>
+              </div>
+            </div>
+
+            {/* Action Controls */}
+            <div className="bg-surface-container/50 rounded-xl p-md border border-outline-variant/20 flex flex-col">
+              <h4 className="font-label text-xs uppercase tracking-widest text-on-surface-variant mb-3">Action Controls</h4>
+              <div className="grid grid-cols-2 gap-2">
+                <button onClick={() => { onUpdateStatus(unit.id, 'Online'); onClose(); }} className="flex items-center gap-2 px-3 py-2 bg-surface-container-highest/50 hover:bg-primary/10 rounded-lg border border-outline-variant/30 text-on-surface transition-all group">
+                  <span className="material-symbols-outlined text-sm text-on-surface-variant group-hover:text-primary">play_arrow</span>
+                  <span className="text-xs font-medium">Save Reactivate</span>
+                </button>
+                <button className="flex items-center gap-2 px-3 py-2 bg-surface-container-highest/50 hover:bg-primary/10 rounded-lg border border-outline-variant/30 text-on-surface transition-all group">
+                  <span className="material-symbols-outlined text-sm text-on-surface-variant group-hover:text-primary">restart_alt</span>
+                  <span className="text-xs font-medium">Reboot System</span>
+                </button>
+                <button className="flex items-center gap-2 px-3 py-2 bg-surface-container-highest/50 hover:bg-primary/10 rounded-lg border border-outline-variant/30 text-on-surface transition-all group">
+                  <span className="material-symbols-outlined text-sm text-on-surface-variant group-hover:text-primary">lock_open</span>
+                  <span className="text-xs font-medium">Unlock Door</span>
+                </button>
+                <button className="flex items-center gap-2 px-3 py-2 bg-surface-container-highest/50 hover:bg-primary/10 rounded-lg border border-outline-variant/30 text-on-surface transition-all group">
+                  <span className="material-symbols-outlined text-sm text-on-surface-variant group-hover:text-primary">tune</span>
+                  <span className="text-xs font-medium">Kalibrasi Sensor</span>
+                </button>
+                <button className="flex items-center gap-2 px-3 py-2 bg-surface-container-highest/50 hover:bg-primary/10 rounded-lg border border-outline-variant/30 text-on-surface transition-all group">
+                  <span className="material-symbols-outlined text-sm text-on-surface-variant group-hover:text-primary">file_export</span>
+                  <span className="text-xs font-medium">Export Logs</span>
+                </button>
+                <button onClick={onClose} className="flex items-center gap-2 px-3 py-2 bg-primary hover:bg-primary-fixed-dim rounded-lg text-on-primary shadow-lg shadow-primary/10 transition-all group">
+                  <span className="material-symbols-outlined text-sm">save</span>
+                  <span className="text-xs font-bold">Save as Draft</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function RvmCard({ unit, onUpdateStatus, onOpenMaintenance }: { unit: RvmUnit, onUpdateStatus: (id: string, status: RvmStatus) => void, onOpenMaintenance: (unit: RvmUnit) => void }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
@@ -142,6 +282,7 @@ function RvmCard({ unit, onUpdateStatus }: { unit: RvmUnit, onUpdateStatus: (id:
               <button
                 onClick={() => {
                   onUpdateStatus(unit.id, 'MAINTENANCE');
+                  onOpenMaintenance(unit);
                   setMenuOpen(false);
                 }}
                 className="flex items-center gap-2 px-3 py-2 text-xs font-medium text-on-surface hover:bg-primary/10 hover:text-primary transition-colors text-left"
@@ -165,9 +306,13 @@ function RvmCard({ unit, onUpdateStatus }: { unit: RvmUnit, onUpdateStatus: (id:
 
 export default function MesinRvmPage() {
   const [units, setUnits] = useState<RvmUnit[]>(rvmUnits);
+  const [maintenanceUnit, setMaintenanceUnit] = useState<RvmUnit | null>(null);
 
   const handleUpdateStatus = (id: string, newStatus: RvmStatus) => {
     setUnits(prev => prev.map(u => u.id === id ? { ...u, status: newStatus } : u));
+    if (maintenanceUnit && maintenanceUnit.id === id) {
+      setMaintenanceUnit(prev => prev ? { ...prev, status: newStatus } : null);
+    }
   };
 
   return (
@@ -217,10 +362,19 @@ export default function MesinRvmPage() {
       <main className="p-6">
         <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {units.map((unit) => (
-            <RvmCard key={unit.id} unit={unit} onUpdateStatus={handleUpdateStatus} />
+            <RvmCard key={unit.id} unit={unit} onUpdateStatus={handleUpdateStatus} onOpenMaintenance={setMaintenanceUnit} />
           ))}
         </section>
       </main>
+
+      {/* Maintenance Modal */}
+      {maintenanceUnit && (
+        <MaintenanceModal 
+          unit={maintenanceUnit} 
+          onClose={() => setMaintenanceUnit(null)} 
+          onUpdateStatus={handleUpdateStatus} 
+        />
+      )}
 
       {/* Footer */}
       <footer className="mt-auto px-8 py-6 border-t border-outline-variant/30 flex justify-between items-center text-[10px] text-on-surface-variant opacity-50 uppercase tracking-widest font-label font-bold">

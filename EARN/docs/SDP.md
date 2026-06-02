@@ -47,7 +47,21 @@
 
 - **2026-05-28 17:05:00** - Penyesuaian Seluruh Dokumen Arsitektur dengan Flowchart Sistem. - *Handoff: Memperbarui `SRS.md`, `SRD.md`, `SDD.md`, dan `STD.md` untuk mengakomodasi perubahan metode login Maintenance bagi Operator (menggunakan OTP Acak via Web Dashboard dan opsi fallback Tombol Rahasia lokal, menggantikan metode lama scan QR Code).*
 
+- **2026-06-02 12:09:00** - Pembaruan UI Halaman Detail RVM sesuai mockup. - *Handoff: Menghapus tombol 'Empty Tank' dan menggabungkan opsi 'Maintenance' serta 'Reactivate' ke dalam satu tombol interaktif dengan React State `localMaintenance` pada rute `/mesin-rvm/[id]/page.tsx`. Perubahan status mode juga mengubah lencana (badge) kapasitas/status secara real-time.*
+
+- **2026-06-02 12:15:00** - Penyesuaian Layout Halaman Detail RVM. - *Handoff: Merefaktor rute `/mesin-rvm/[id]/page.tsx` dengan menghapus custom inline header dan menggantinya dengan komponen reusable `<Header />`.*
+- **2026-06-02 12:17:00** - Penyesuaian Full-Width Detail RVM. - *Handoff: Menyembunyikan komponen `Sidebar` secara kondisional di rute `/mesin-rvm/[id]` dan mengubah container margin agar halaman tampil *full-width* sesuai *mockup* awal tanpa menyisakan ruang kosong di sisi kiri.*
+- **2026-06-02 14:26:00** - Pembuatan Popup Maintenance. - *Handoff: Mengimplementasikan komponen `MaintenanceModal` di rute `/mesin-rvm/page.tsx` yang memuat statistik langsung, *live feed* kamera RVM, *system logs*, dan *action controls* sesuai spesifikasi desain. Diintegrasikan ke tombol 'Maintenance' di menu titik-tiga pada setiap unit card.*
+
+- **2026-06-02 15:15:00** - Verifikasi dan Penyelarasan UI Popup Maintenance. - *Handoff: Memastikan popup maintenance muncul saat tombol Maintenance di menu titik tiga diklik. Menyesuaikan teks tombol "Reactivate" menjadi "Save Reactivate" dan "Simpan Perubahan" menjadi "Save as Draft" pada `Action Controls` agar sesuai presisi dengan referensi desain/HTML yang diberikan User.*
+
+- **2026-06-02 15:31:00** - Penyesuaian Backdrop Popup Maintenance. - *Handoff: Memperbarui styling overlay modal pada `/mesin-rvm/page.tsx` dari `bg-background/80 backdrop-blur-xl` menjadi `bg-black/40 backdrop-blur-md` agar efek transparan dan blur pada halaman di belakangnya terlihat lebih jelas dan tidak pekat hitam.*
+
+- **2026-06-02 15:53:00** - Penyesuaian Lanjutan Backdrop Popup Maintenance. - *Handoff: Mengurangi intensitas blur pada overlay modal dari `backdrop-blur-md` menjadi `backdrop-blur` (nilai default Tailwind: 8px) untuk memberikan visibilitas yang lebih baik terhadap elemen antarmuka di belakangnya sesuai dengan umpan balik visual User.*
+
+- **2026-06-02 15:56:00** - Penyesuaian Final Backdrop Popup Maintenance. - *Handoff: Menurunkan lagi efek blur pada overlay dari `backdrop-blur` (8px) menjadi `backdrop-blur-sm` (4px). Latar belakang kini menjadi jauh lebih transparan dan tajam sambil mempertahankan batas modal yang jelas.*
+
+- **2026-06-02 17:27:00** - Pembaruan Dokumen Arsitektur (Sinkronisasi Progres). - *Handoff: Memperbarui seluruh dokumen utama (`SDD.md`, `SRS.md`, `SRD.md`, dan `STD.md`) tanpa menghapus konten asli. Penambahan difokuskan pada penggabungan diagram relasional (ERD) & alir data (DFD), standar desain UI/UX (Bio-Digital Minimalism), penjabaran alur fungsional Maintenance Modal, serta draf pengujian interaksi antarmuka (Web Dashboard).*
+
 ---
 *(Entri log selanjutnya akan ditambahkan di atas garis ini)*
-
-

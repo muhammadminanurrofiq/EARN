@@ -29,3 +29,8 @@ Tabel Utama:
 Sistem mendukung alur *Maintenance* ganda untuk memfasilitasi kebutuhan Operator di lapangan (berdasarkan Topologi Sistem):
 - **Remote (Web Dashboard):** RVM men-generate OTP Acak yang divalidasi oleh sistem via input Operator di Dashboard (memanfaatkan alur komunikasi MQTT/DB).
 - **Lokal (RVM GUI):** Opsi *fallback* tanpa bergantung koneksi server, melalui *Tombol Rahasia* di layar sentuh RVM.
+
+## 5. Antarmuka Web (Dashboard) & Desain Visual
+Sistem menggunakan pendekatan *Bio-Digital Minimalism* untuk Web Dashboard:
+- **Komponen Modular:** Menggunakan prinsip *glassmorphism* (mis. popup *Maintenance Modal* dengan *backdrop blur* proporsional untuk mempertahankan konteks latar).
+- **Pemetaan Relasi & Alur:** Struktur Database (Prisma) dan aliran pesan *event-driven* telah didokumentasikan sepenuhnya ke dalam bentuk *Data Flow Diagram* (DFD) dan *Entity Relationship Diagram* (ERD) sebagai referensi standar pengembangan lanjutan.

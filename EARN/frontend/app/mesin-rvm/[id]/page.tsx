@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
+import Header from '@/components/Header';
 
 export default function RvmDetailPage({ params }: { params: { id: string } }) {
   const [strokeDashoffset, setStrokeDashoffset] = useState(565.48); // Initial state for circle animation
@@ -9,7 +10,9 @@ export default function RvmDetailPage({ params }: { params: { id: string } }) {
   const id = params.id || 'RVM-01';
   
   // Dummy data based on ID
-  const isMaintenance = id === 'RVM-06';
+  const initialIsMaintenance = id === 'RVM-06';
+  const [localMaintenance, setLocalMaintenance] = useState(initialIsMaintenance);
+  
   const isFull = id === 'RVM-03';
   const isOffline = id === 'RVM-05';
   
@@ -17,9 +20,9 @@ export default function RvmDetailPage({ params }: { params: { id: string } }) {
   let statusColor = 'primary';
   let capacity = 78; // %
   
-  if (isMaintenance) {
+  if (localMaintenance) {
     statusText = 'MAINTENANCE';
-    statusColor = 'yellow-500';
+    statusColor = 'error';
     capacity = 0;
   } else if (isFull) {
     statusText = 'FULL';
@@ -42,7 +45,10 @@ export default function RvmDetailPage({ params }: { params: { id: string } }) {
   }, [capacity]);
 
   return (
-    <div className="w-full min-h-screen bg-background text-on-surface font-body-md pb-10">
+    <div className="w-full flex flex-col min-h-screen relative bg-background text-on-surface font-body-md pb-10">
+      {/* Background Decorative Elements */}
+      <div className="fixed top-[-20%] right-[-10%] w-[600px] h-[600px] bg-primary/5 rounded-full blur-[120px] pointer-events-none z-[-1]"></div>
+      <div className="fixed bottom-[-10%] left-[15%] w-[400px] h-[400px] bg-secondary-container/10 rounded-full blur-[100px] pointer-events-none z-[-1]"></div>
       <style>{`
         .glass-card {
             background: rgba(22, 29, 26, 0.4);
@@ -78,45 +84,21 @@ export default function RvmDetailPage({ params }: { params: { id: string } }) {
         }
       `}</style>
 
-      {/* Fixed TopAppBar with Back Navigation */}
-      <header className="fixed top-0 left-0 right-0 z-40 bg-surface/80 backdrop-blur-xl border-b border-outline-variant/10 shadow-[0_4px_20px_rgba(16,185,129,0.05)]">
-        <div className="flex justify-between items-center px-8 py-4">
-          {/* Left: Back button + Breadcrumbs */}
-          <div className="flex flex-col gap-1">
-            <Link href="/mesin-rvm" className="flex items-center gap-2 text-on-surface-variant hover:text-primary transition-colors group w-fit text-sm font-medium">
-              <span className="material-symbols-outlined text-xl transition-transform group-hover:-translate-x-1">arrow_back</span>
-              <span>Kembali</span>
-            </Link>
-            <nav className="flex items-center gap-2 text-on-surface-variant/80 font-label text-[10px] uppercase tracking-wider">
-              <Link href="/mesin-rvm" className="hover:text-primary transition-colors">Mesin RVM</Link>
-              <span className="material-symbols-outlined text-base">chevron_right</span>
-              <span className="text-primary font-bold">{id} Detail</span>
-            </nav>
-          </div>
-          
-          {/* Right: Search + Actions */}
-          <div className="flex items-center gap-6">
-            <div className="relative group hidden md:block">
-              <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
-              <input className="bg-surface-container-low border border-outline-variant/20 rounded-full pl-10 pr-4 py-2 focus:outline-none focus:border-primary w-64 text-sm transition-all" placeholder="Search machines..." type="text" />
-            </div>
-            <div className="flex items-center gap-4">
-              <button className="text-on-surface-variant hover:text-primary transition-colors">
-                <span className="material-symbols-outlined">notifications</span>
-              </button>
-              <button className="text-on-surface-variant hover:text-primary transition-colors">
-                <span className="material-symbols-outlined">settings</span>
-              </button>
-              <div className="h-10 w-10 rounded-full overflow-hidden border border-primary/20">
-                <img alt="User profile" className="h-full w-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBx5k5NAJObc8f2lUxLKsA0JqFNVrfkc9VcnFZaJBKOFBYj-Oy8_5NXSvNgZGJow7uk-R3snQ_qCN-gfrC92SzScj-5ftLzDtA9op20O6HfOV6S2mE2OAvp21ijPKXvZaGL3gTbrqgmPYZdD0jXyvhRt0mtp8qsojYbtqeC-de_ujjl2eIQBoUrzSm0sS4CRU2YRNVbJgNbxgy01QT1KfBOyCIOFnhhosQHmuh1fQGvw7EvdREBTgKR5sUsJd0SedQVEggnVgwmKAs" />
-              </div>
-            </div>
-          </div>
-        </div>
-      </header>
+      {/* Shared Sticky Navbar */}
+      <Header
+        title={`${id} Detail`}
+        subtitle="Monitoring Real-time RVM Unit"
+        icon="memory"
+        leftExtra={
+          <Link href="/mesin-rvm" className="flex items-center gap-2 text-on-surface-variant hover:text-primary transition-colors group w-fit text-[10px] font-bold uppercase tracking-wider font-label bg-surface-container px-3 py-1.5 rounded-lg border border-outline-variant/30">
+            <span className="material-symbols-outlined text-sm transition-transform group-hover:-translate-x-1">arrow_back</span>
+            <span className="hidden sm:inline">Kembali</span>
+          </Link>
+        }
+      />
 
-      {/* Page Content — offset for fixed header */}
-      <div className="px-8 py-6 pt-[90px] max-w-[1600px] mx-auto">
+      {/* Page Content */}
+      <div className="px-8 py-6 max-w-[1600px] mx-auto w-full">
 
         {/* Hero Header */}
         <div className="glass-card rounded-2xl p-8 mb-6 relative overflow-hidden">
@@ -137,17 +119,20 @@ export default function RvmDetailPage({ params }: { params: { id: string } }) {
             </div>
             
             <div className="flex flex-wrap gap-4">
-              <button className="px-6 py-2.5 bg-surface-container-high hover:bg-surface-container-highest text-on-surface font-label text-sm font-medium rounded-xl transition-all flex items-center gap-2 border border-outline-variant/30">
-                <span className="material-symbols-outlined">restart_alt</span>
-                Reactivate
-              </button>
-              <button className="px-6 py-2.5 bg-surface-container-high hover:bg-surface-container-highest text-on-surface font-label text-sm font-medium rounded-xl transition-all flex items-center gap-2 border border-outline-variant/30">
-                <span className="material-symbols-outlined">build</span>
-                Maintenance Mode
-              </button>
-              <button className="px-6 py-2.5 bg-primary/20 text-primary font-bold rounded-xl transition-all flex items-center gap-2 hover:bg-primary/30 organic-glow-primary border border-primary/30">
-                <span className="material-symbols-outlined">delete_sweep</span>
-                Empty Tank
+              <button 
+                onClick={() => setLocalMaintenance(!localMaintenance)}
+                className={`flex items-center gap-2 px-8 py-2.5 rounded-xl transition-all duration-300 group ${
+                  localMaintenance 
+                    ? 'bg-primary text-on-primary shadow-[0_0_15px_rgba(78,222,163,0.3)] hover:scale-[1.02] active:scale-[0.98]' 
+                    : 'bg-surface-container-highest text-on-surface border border-outline-variant/30 hover:bg-surface-container-high hover:scale-[1.02] active:scale-[0.98]'
+                }`}
+              >
+                <span className="material-symbols-outlined text-[20px] transition-transform group-hover:rotate-180">
+                  {localMaintenance ? 'play_circle' : 'build'}
+                </span>
+                <span className="font-label text-xs font-bold uppercase tracking-wider">
+                  {localMaintenance ? 'Reactivate' : 'Maintenance'}
+                </span>
               </button>
             </div>
           </div>
