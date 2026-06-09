@@ -3,28 +3,114 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Header from '@/components/Header';
+import { getMesinRVMs, createMesinRVM, updateStatusMesin, deleteMesinRVM, RvmStatus } from '@/app/actions/rvm';
+import { useRouter } from 'next/navigation';
 
 // ── Types ──────────────────────────────────────────────────────────────────────
-type RvmStatus = 'Online' | 'Offline' | 'FULL' | 'MAINTENANCE';
 
 interface RvmUnit {
   id: string;
   lokasi: string;
   status: RvmStatus;
   kapasitas: number; // percentage
+  sensor?: any;
 }
 
-// ── Mock Data ─────────────────────────────────────────────────────────────────
-const rvmUnits: RvmUnit[] = [
-  { id: 'RVM-01', lokasi: 'Fakultas Teknik', status: 'Online', kapasitas: 78 },
-  { id: 'RVM-02', lokasi: 'Kantin Center', status: 'Online', kapasitas: 45 },
-  { id: 'RVM-03', lokasi: 'Perpustakaan', status: 'FULL', kapasitas: 100 },
-  { id: 'RVM-04', lokasi: 'Gedung Rektorat', status: 'Online', kapasitas: 12 },
-  { id: 'RVM-05', lokasi: 'Laboratorium Riset', status: 'Offline', kapasitas: 0 },
-  { id: 'RVM-06', lokasi: 'Area Parkir', status: 'MAINTENANCE', kapasitas: 0 },
-];
-
 // ── Sub-Components ─────────────────────────────────────────────────────────────
+
+function AddMachineModal({ onClose, onAdd }: { onClose: () => void, onAdd: (data: any) => Promise<void> }) {
+  const [idMesin, setIdMesin] = useState('');
+  const [lokasi, setLokasi] = useState('');
+  const [lat, setLat] = useState<string>('');
+  const [lng, setLng] = useState<string>('');
+  const [kapasitas, setKapasitas] = useState(800);
+  const [initialStatus, setInitialStatus] = useState('offline');
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    await onAdd({ 
+      id_mesin: idMesin, 
+      lokasi, 
+      kapasitas_maks: kapasitas,
+      lat: lat ? parseFloat(lat) : undefined,
+      lng: lng ? parseFloat(lng) : undefined,
+      initialStatus
+    });
+    setLoading(false);
+  };
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm">
+      <div className="bg-surface-container-high border border-outline-variant/30 rounded-xl w-full max-w-md shadow-2xl overflow-hidden">
+        <div className="px-6 py-4 border-b border-outline-variant/30 flex justify-between items-center bg-surface-container-highest">
+          <h3 className="font-headline text-lg font-bold text-primary">Tambah Unit Baru</h3>
+          <button onClick={onClose} className="text-on-surface-variant hover:text-error transition-colors">
+            <span className="material-symbols-outlined">close</span>
+          </button>
+        </div>
+        <form onSubmit={handleSubmit}>
+          <div className="p-6 space-y-4">
+            <div className="space-y-1">
+              <label className="text-xs font-label text-on-surface-variant uppercase tracking-wider">ID / Nama Mesin</label>
+              <input required value={idMesin} onChange={e => setIdMesin(e.target.value)} className="w-full bg-surface-container border border-outline-variant/30 rounded-lg px-4 py-2 text-sm text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" placeholder="Contoh: RVM-07" type="text" />
+            </div>
+            
+            <div className="space-y-1">
+              <label className="text-xs font-label text-on-surface-variant uppercase tracking-wider">LOKASI FISIK</label>
+              <input required value={lokasi} onChange={e => setLokasi(e.target.value)} className="w-full bg-surface-container border border-outline-variant/30 rounded-lg px-4 py-2 text-sm text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" placeholder="Contoh: Gedung F" type="text" />
+            </div>
+            
+            <div className="space-y-1">
+              <label className="text-xs font-label text-on-surface-variant uppercase tracking-wider">KOORDINAT LOKASI</label>
+              <div className="flex gap-2">
+                <div className="flex-1 relative">
+                  <input value={lat} onChange={e => setLat(e.target.value)} className="w-full bg-surface-container border border-outline-variant/30 rounded-lg px-4 py-2 text-sm text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" placeholder="-6.3621" type="number" step="any" />
+                  <span className="absolute right-3 top-2 text-[10px] text-on-surface-variant font-label opacity-50">LAT</span>
+                </div>
+                <div className="flex-1 relative">
+                  <input value={lng} onChange={e => setLng(e.target.value)} className="w-full bg-surface-container border border-outline-variant/30 rounded-lg px-4 py-2 text-sm text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" placeholder="106.8249" type="number" step="any" />
+                  <span className="absolute right-3 top-2 text-[10px] text-on-surface-variant font-label opacity-50">LNG</span>
+                </div>
+                <button type="button" className="flex items-center justify-center p-2 bg-secondary-container/30 text-secondary border border-secondary/20 rounded-lg hover:bg-secondary/10 transition-all" title="Pilih di Peta">
+                  <span className="material-symbols-outlined">map</span>
+                </button>
+              </div>
+            </div>
+            
+            <div className="space-y-1">
+              <label className="text-xs font-label text-on-surface-variant uppercase tracking-wider">Kapasitas Maksimal (Botol)</label>
+              <input required value={kapasitas} onChange={e => setKapasitas(Number(e.target.value))} className="w-full bg-surface-container border border-outline-variant/30 rounded-lg px-4 py-2 text-sm text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" type="number" />
+            </div>
+            
+            <div className="space-y-1.5">
+              <label className="text-[11px] font-label text-on-surface-variant uppercase tracking-wider block">Mode Status Awal</label>
+              <div className="relative group">
+                <select value={initialStatus} onChange={e => setInitialStatus(e.target.value)} className="w-full bg-surface-container border border-outline-variant/30 rounded-lg px-4 py-2.5 text-sm text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all appearance-none cursor-pointer font-body-md pr-10">
+                  <option value="online">Online</option>
+                  <option value="offline">Offline (Default)</option>
+                  <option value="full">Full</option>
+                  <option value="maintenance">Maintenance</option>
+                </select>
+                <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-primary">
+                  <span className="material-symbols-outlined text-xl">expand_more</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div className="px-6 py-4 bg-surface-container-lowest border-t border-outline-variant/30 flex gap-3 justify-end">
+            <button type="button" onClick={onClose} className="px-4 py-2 rounded-lg text-xs font-bold font-label text-on-surface-variant hover:bg-surface-variant transition-all">BATAL</button>
+            <button type="submit" disabled={loading} className="px-6 py-2 rounded-lg bg-primary text-on-primary text-xs font-bold font-label shadow-lg shadow-primary/20 hover:bg-primary-container transition-all">
+              {loading ? 'MENYIMPAN...' : 'SIMPAN MESIN'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
 
 function MaintenanceModal({ unit, onClose, onUpdateStatus }: { unit: RvmUnit, onClose: () => void, onUpdateStatus: (id: string, status: RvmStatus) => void }) {
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -84,18 +170,23 @@ function MaintenanceModal({ unit, onClose, onUpdateStatus }: { unit: RvmUnit, on
               </div>
             </div>
             <div className="lg:col-span-3 flex flex-col gap-md">
-              <div className="flex-1 bg-surface-container/50 rounded-xl p-md border border-outline-variant/20 flex flex-col items-center justify-center text-center">
-                <span className="material-symbols-outlined text-primary mb-2">humidity_mid</span>
-                <p className="text-[10px] font-label uppercase tracking-widest text-on-surface-variant mb-1">Kelembaban</p>
-                <p className="text-xl font-headline font-bold text-primary">92%</p>
-                <p className="text-[9px] text-secondary font-medium mt-1">Normal Pressure</p>
-              </div>
-              <div className="flex-1 bg-surface-container/50 rounded-xl p-md border border-outline-variant/20 flex flex-col items-center justify-center text-center">
-                <span className="material-symbols-outlined text-primary mb-2">thermostat</span>
-                <p className="text-[10px] font-label uppercase tracking-widest text-on-surface-variant mb-1">Suhu Internal</p>
-                <p className="text-xl font-headline font-bold text-primary">24°C</p>
-                <p className="text-[9px] text-secondary font-medium mt-1">Optimal Range</p>
-              </div>
+              {unit.sensor && Object.keys(unit.sensor).length > 0 ? (
+                Object.entries(unit.sensor).slice(0, 2).map(([key, value], idx) => (
+                  <div key={idx} className="flex-1 bg-surface-container/50 rounded-xl p-md border border-outline-variant/20 flex flex-col items-center justify-center text-center">
+                    <span className="material-symbols-outlined text-primary mb-2">
+                      {key.toLowerCase().includes('suhu') ? 'thermostat' : key.toLowerCase().includes('lembab') ? 'humidity_mid' : 'sensors'}
+                    </span>
+                    <p className="text-[10px] font-label uppercase tracking-widest text-on-surface-variant mb-1">{key}</p>
+                    <p className="text-xl font-headline font-bold text-primary">{String(value)}{key.toLowerCase().includes('suhu') ? '°C' : key.toLowerCase().includes('lembab') ? '%' : ''}</p>
+                    <p className="text-[9px] text-secondary font-medium mt-1">Real-time Data</p>
+                  </div>
+                ))
+              ) : (
+                <div className="flex-1 bg-surface-container/50 rounded-xl p-md border border-outline-variant/20 flex flex-col items-center justify-center text-center">
+                  <span className="material-symbols-outlined text-on-surface-variant/50 mb-2">sensors_off</span>
+                  <p className="text-[10px] font-label uppercase tracking-widest text-on-surface-variant mb-1">Sensor Kosong</p>
+                </div>
+              )}
             </div>
             <div className="lg:col-span-5 bg-surface-container/50 rounded-xl border border-outline-variant/20 flex flex-col overflow-hidden">
               <div className="relative aspect-video">
@@ -166,7 +257,7 @@ function MaintenanceModal({ unit, onClose, onUpdateStatus }: { unit: RvmUnit, on
   );
 }
 
-function RvmCard({ unit, onUpdateStatus, onOpenMaintenance }: { unit: RvmUnit, onUpdateStatus: (id: string, status: RvmStatus) => void, onOpenMaintenance: (unit: RvmUnit) => void }) {
+function RvmCard({ unit, onUpdateStatus, onOpenMaintenance, onDelete }: { unit: RvmUnit, onUpdateStatus: (id: string, status: RvmStatus) => void, onOpenMaintenance: (unit: RvmUnit) => void, onDelete: (id: string) => void }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
@@ -290,7 +381,7 @@ function RvmCard({ unit, onUpdateStatus, onOpenMaintenance }: { unit: RvmUnit, o
                 <span className="material-symbols-outlined text-sm">build</span>
                 Maintenance
               </button>
-              <button className="flex items-center gap-2 px-3 py-2 text-xs font-medium text-error hover:bg-error/10 transition-colors text-left border-t border-outline-variant/10">
+              <button onClick={() => onDelete(unit.id)} className="flex items-center gap-2 px-3 py-2 text-xs font-medium text-error hover:bg-error/10 transition-colors text-left border-t border-outline-variant/10">
                 <span className="material-symbols-outlined text-sm">delete</span>
                 Hapus
               </button>
@@ -305,13 +396,69 @@ function RvmCard({ unit, onUpdateStatus, onOpenMaintenance }: { unit: RvmUnit, o
 // ── Main Page Component ───────────────────────────────────────────────────────
 
 export default function MesinRvmPage() {
-  const [units, setUnits] = useState<RvmUnit[]>(rvmUnits);
+  const [units, setUnits] = useState<RvmUnit[]>([]);
   const [maintenanceUnit, setMaintenanceUnit] = useState<RvmUnit | null>(null);
+  const [isAdding, setIsAdding] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
-  const handleUpdateStatus = (id: string, newStatus: RvmStatus) => {
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+  const limit = 6;
+
+  const fetchUnits = async (page: number) => {
+    setLoading(true);
+    const result = await getMesinRVMs(page, limit);
+    if (result.success && result.data && result.pagination) {
+      setUnits(result.data as RvmUnit[]);
+      setTotalPages(result.pagination.totalPages);
+      setTotalItems(result.pagination.total);
+      setCurrentPage(result.pagination.page);
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    fetchUnits(currentPage);
+  }, [currentPage]);
+
+  const handleUpdateStatus = async (id: string, newStatus: RvmStatus) => {
     setUnits(prev => prev.map(u => u.id === id ? { ...u, status: newStatus } : u));
     if (maintenanceUnit && maintenanceUnit.id === id) {
       setMaintenanceUnit(prev => prev ? { ...prev, status: newStatus } : null);
+    }
+    await updateStatusMesin(id, newStatus);
+  };
+
+  const handleDelete = async (id: string) => {
+    if (confirm(`Yakin ingin menghapus mesin ${id}?`)) {
+      await deleteMesinRVM(id);
+      fetchUnits(currentPage);
+    }
+  };
+
+  const handleAdd = async (data: { 
+    id_mesin: string; 
+    lokasi: string; 
+    kapasitas_maks: number;
+    lat?: number;
+    lng?: number;
+    initialStatus?: string;
+    sensor?: any;
+  }) => {
+    // Add default sensors
+    data.sensor = [
+      { name: "Suhu", icon: "device_thermostat", dataType: "Celsius", sensorType: "SHT4x", barcode: "S-001", value: 0 },
+      { name: "Kelembaban", icon: "humidity_percentage", dataType: "Percentage", sensorType: "SHT4x", barcode: "H-001", value: 0 }
+    ];
+    const res = await createMesinRVM(data);
+    if (res.success) {
+      setIsAdding(false);
+      router.push(`/mesin-rvm/${data.id_mesin}`);
+    } else {
+      alert("Gagal menambah mesin: " + res.message);
     }
   };
 
@@ -360,19 +507,83 @@ export default function MesinRvmPage() {
 
       {/* Main Content Area */}
       <main className="p-6">
-        <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {units.map((unit) => (
-            <RvmCard key={unit.id} unit={unit} onUpdateStatus={handleUpdateStatus} onOpenMaintenance={setMaintenanceUnit} />
-          ))}
-        </section>
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex flex-col"></div>
+          <button onClick={() => setIsAdding(true)} className="flex items-center gap-xs px-md py-2 bg-primary text-on-primary rounded-lg font-bold text-sm hover:bg-primary-container transition-all shadow-lg shadow-primary/20">
+            <span className="material-symbols-outlined text-base">add</span>
+            <span className="">Tambah Mesin Baru</span>
+          </button>
+        </div>
+
+        {loading ? (
+          <div className="flex justify-center items-center py-12">
+            <span className="material-symbols-outlined animate-spin text-primary text-4xl">autorenew</span>
+          </div>
+        ) : (
+          <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {units.map((unit) => (
+              <RvmCard key={unit.id} unit={unit} onUpdateStatus={handleUpdateStatus} onOpenMaintenance={setMaintenanceUnit} onDelete={handleDelete} />
+            ))}
+            {units.length === 0 && (
+              <div className="col-span-full text-center py-12 text-on-surface-variant font-label">
+                Belum ada data mesin RVM.
+              </div>
+            )}
+          </section>
+        )}
+
+        {/* Pagination Controls */}
+        <div className="mt-12 flex items-center justify-between border-t border-outline-variant/30 pt-6">
+          <p className="text-xs text-on-surface-variant font-label tracking-wide uppercase opacity-70">
+            Menampilkan {units.length} dari {totalItems} Unit
+          </p>
+          <nav className="flex items-center gap-2">
+            <button 
+              disabled={currentPage === 1}
+              onClick={() => setCurrentPage(p => p - 1)}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg border border-outline-variant/30 text-on-surface-variant hover:bg-primary/10 hover:text-primary transition-all disabled:opacity-30 disabled:cursor-not-allowed">
+              <span className="material-symbols-outlined text-sm">chevron_left</span>
+              <span className="text-xs font-bold font-label">Sebelumnya</span>
+            </button>
+            <div className="flex items-center gap-1 mx-2">
+              {Array.from({ length: totalPages }).map((_, idx) => (
+                <button 
+                  key={idx} 
+                  onClick={() => setCurrentPage(idx + 1)}
+                  className={`w-9 h-9 rounded-lg text-xs font-bold font-label transition-all ${
+                    currentPage === idx + 1 
+                      ? 'bg-primary text-on-primary shadow-lg shadow-primary/20'
+                      : 'text-on-surface-variant hover:bg-primary/5 hover:text-primary'
+                  }`}
+                >
+                  {idx + 1}
+                </button>
+              ))}
+            </div>
+            <button 
+              disabled={currentPage === totalPages || totalPages === 0}
+              onClick={() => setCurrentPage(p => p + 1)}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg border border-outline-variant/30 text-on-surface-variant hover:bg-primary/10 hover:text-primary transition-all disabled:opacity-30 disabled:cursor-not-allowed">
+              <span className="text-xs font-bold font-label">Selanjutnya</span>
+              <span className="material-symbols-outlined text-sm">chevron_right</span>
+            </button>
+          </nav>
+        </div>
       </main>
 
-      {/* Maintenance Modal */}
+      {/* Modals */}
       {maintenanceUnit && (
         <MaintenanceModal 
           unit={maintenanceUnit} 
           onClose={() => setMaintenanceUnit(null)} 
           onUpdateStatus={handleUpdateStatus} 
+        />
+      )}
+      
+      {isAdding && (
+        <AddMachineModal 
+          onClose={() => setIsAdding(false)} 
+          onAdd={handleAdd} 
         />
       )}
 

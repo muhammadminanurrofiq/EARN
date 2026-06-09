@@ -3,39 +3,197 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Header from '@/components/Header';
+import { getMesinById, updateMesinSensor, updateStatusMesin } from '@/app/actions/rvm';
 
 export default function RvmDetailPage({ params }: { params: { id: string } }) {
-  const [strokeDashoffset, setStrokeDashoffset] = useState(565.48); // Initial state for circle animation
-  
-  const id = params.id || 'RVM-01';
-  
-  // Dummy data based on ID
-  const initialIsMaintenance = id === 'RVM-06';
-  const [localMaintenance, setLocalMaintenance] = useState(initialIsMaintenance);
-  
-  const isFull = id === 'RVM-03';
-  const isOffline = id === 'RVM-05';
-  
-  let statusText = 'ONLINE';
-  let statusColor = 'primary';
-  let capacity = 78; // %
-  
-  if (localMaintenance) {
-    statusText = 'MAINTENANCE';
-    statusColor = 'error';
-    capacity = 0;
-  } else if (isFull) {
-    statusText = 'FULL';
-    statusColor = 'error';
-    capacity = 100;
-  } else if (isOffline) {
-    statusText = 'OFFLINE';
-    statusColor = 'outline';
-    capacity = 0;
-  }
+  const id = params.id;
+  const [mesin, setMesin] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [strokeDashoffset, setStrokeDashoffset] = useState(565.48);
+
+  // Sensor config state
+  const [isSensorModalOpen, setIsSensorModalOpen] = useState(false);
+  const [sensors, setSensors] = useState<any[]>([]);
+  const [savingSensor, setSavingSensor] = useState(false);
+  const [newSensor, setNewSensor] = useState({ icon: 'sensors', name: '', dataType: 'Percentage', sensorType: '', barcode: '' });
+  const [showSuggestions, setShowSuggestions] = useState(false);
+
+  useEffect(() => {
+    fetchMesin();
+  }, [id]);
+
+  const fetchMesin = async () => {
+    setLoading(true);
+    const res = await getMesinById(id);
+    if (res.success && res.data) {
+      setMesin(res.data);
+      let parsedSensors: any[] = [];
+      if (Array.isArray(res.data.sensor)) {
+        parsedSensors = res.data.sensor;
+      } else if (res.data.sensor && typeof res.data.sensor === 'object') {
+        // Fallback for old object-based sensors
+        parsedSensors = Object.entries(res.data.sensor).map(([k, v]) => ({
+          name: k,
+          icon: 'sensors',
+          value: v,
+          dataType: 'Percentage'
+        }));
+      }
+      setSensors(parsedSensors);
+    }
+    setLoading(false);
+  };
+
+  const handleToggleMaintenance = async () => {
+    if (!mesin) return;
+    const newStatus = mesin.status === 'MAINTENANCE' ? 'Online' : 'MAINTENANCE';
+    await updateStatusMesin(id, newStatus);
+    fetchMesin();
+  };
+
+  const handleSaveSensor = async (sensorList: any[]) => {
+    setSavingSensor(true);
+    await updateMesinSensor(id, sensorList);
+    setIsSensorModalOpen(false);
+    fetchMesin();
+    setSavingSensor(false);
+  };
+
+  const handleAddSensorSubmit = () => {
+    if (!newSensor.name) return alert('Nama sensor wajib diisi!');
+    const updatedSensors = [...sensors, { ...newSensor, value: 0 }];
+    handleSaveSensor(updatedSensors);
+    setNewSensor({ icon: 'sensors', name: '', dataType: 'Percentage', sensorType: '', barcode: '' });
+  };
+
+  const handleRemoveSensor = (index: number) => {
+    if (confirm('Yakin ingin menghapus sensor ini?')) {
+      const updatedSensors = sensors.filter((_, i) => i !== index);
+      handleSaveSensor(updatedSensors);
+    }
+  };
+
+  const predefinedSensors = [
+    { name: 'Sensor MQ-2 (asap & LPG)', icon: 'co2' },
+    { name: 'Sensor MQ-3 (alkohol)', icon: 'science' },
+    { name: 'Sensor MQ-4 (metana/gas alam)', icon: 'co2' },
+    { name: 'Sensor MQ-5 (LPG & gas kota)', icon: 'co2' },
+    { name: 'Sensor MQ-6 (LPG & butana)', icon: 'co2' },
+    { name: 'Sensor MQ-7 (karbon monoksida/CO)', icon: 'co2' },
+    { name: 'Sensor MQ-8 (hidrogen)', icon: 'science' },
+    { name: 'Sensor MQ-9 (CO & gas)', icon: 'co2' },
+    { name: 'Sensor MQ-131 (ozon)', icon: 'air' },
+    { name: 'Sensor MQ-135 (kualitas udara/amonia/benzena)', icon: 'air' },
+    { name: 'Sensor MQ-136 (hidrogen sulfida)', icon: 'science' },
+    { name: 'Sensor MQ-137 (amonia)', icon: 'science' },
+    { name: 'Sensor MQ-138 (aseton/uap organik)', icon: 'science' },
+    { name: 'Sensor MQ-214 (metana)', icon: 'co2' },
+    { name: 'Sensor MQ-303A (alkohol portabel)', icon: 'science' },
+    { name: 'Sensor suhu DHT11', icon: 'device_thermostat' },
+    { name: 'Sensor suhu DHT22', icon: 'device_thermostat' },
+    { name: 'Sensor suhu DS18B20 (waterproof)', icon: 'device_thermostat' },
+    { name: 'Sensor suhu LM35', icon: 'device_thermostat' },
+    { name: 'Sensor suhu & tekanan BMP280', icon: 'compress' },
+    { name: 'Sensor suhu & kelembaban SHT31', icon: 'humidity_percentage' },
+    { name: 'Sensor suhu inframerah MLX90614', icon: 'device_thermostat' },
+    { name: 'Sensor termokopel MAX6675', icon: 'device_thermostat' },
+    { name: 'Sensor ultrasonik HC-SR04', icon: 'settings_input_antenna' },
+    { name: 'Sensor ultrasonik US-100', icon: 'settings_input_antenna' },
+    { name: 'Sensor jarak laser VL53L0X (ToF)', icon: 'visibility' },
+    { name: 'Sensor inframerah tcrt5000', icon: 'visibility' },
+    { name: 'Sensor rintangan inframerah KY-032', icon: 'settings_input_antenna' },
+    { name: 'Sensor gerak PIR HC-SR501', icon: 'directions_run' },
+    { name: 'Sensor gerak mikro RCWL-0516', icon: 'sensors' },
+    { name: 'Sensor akselerometer & giroskop MPU6050', icon: 'vibration' },
+    { name: 'Sensor akselerometer MPU9250', icon: 'vibration' },
+    { name: 'Sensor kompas HMC5883L', icon: 'explore' },
+    { name: 'Sensor magnetik Hall Effect A3144', icon: 'magnet' },
+    { name: 'Sensor kelembaban tanah YL-69', icon: 'water_drop' },
+    { name: 'Sensor kelembaban tanah kapasitif', icon: 'water_drop' },
+    { name: 'Sensor tingkat air (water level)', icon: 'waves' },
+    { name: 'Sensor aliran air YF-S201', icon: 'water' },
+    { name: 'Sensor hujan (rain sensor)', icon: 'thunderstorm' },
+    { name: 'Sensor tekanan barometrik MS5611', icon: 'compress' },
+    { name: 'Sensor cahaya LDR', icon: 'light_mode' },
+    { name: 'Sensor cahaya lux BH1750', icon: 'wb_sunny' },
+    { name: 'Sensor warna TCS3200', icon: 'palette' },
+    { name: 'Sensor warna TCS34725', icon: 'palette' },
+    { name: 'Sensor detak jantung MAX30102', icon: 'favorite' },
+    { name: 'Sensor pulsa (pulse sensor)', icon: 'favorite' },
+    { name: 'Sensor sidik jari AS608', icon: 'fingerprint' },
+    { name: 'Sensor sidik jari kapasitif R307', icon: 'fingerprint' },
+    { name: 'Modul kamera OV7670', icon: 'camera_alt' },
+    { name: 'Modul kamera ESP32-Cam', icon: 'camera_alt' },
+    { name: 'Modul pembaca RFID RC522', icon: 'nfc' },
+    { name: 'Modul pembaca barcode GM65', icon: 'qr_code_scanner' },
+    { name: 'Sensor berat load cell', icon: 'monitor_weight' },
+    { name: 'Modul penguat load cell HX711', icon: 'developer_board' },
+    { name: 'Sensor suara KY-037', icon: 'mic' },
+    { name: 'Sensor suara KY-038', icon: 'mic' },
+    { name: 'Sensor getaran SW-420', icon: 'vibration' },
+    { name: 'Sensor kemiringan SW-520D', icon: 'screen_rotation' },
+    { name: 'Sensor sentuh kapasitif TTP223', icon: 'touch_app' },
+    { name: 'Sensor flex (tekuk)', icon: 'gesture' },
+    { name: 'Sensor tekanan film tipis FSR402', icon: 'compress' },
+    { name: 'Sensor pH air pH-4502C', icon: 'science' },
+    { name: 'Sensor kekeruhan air TSW-30', icon: 'opacity' },
+    { name: 'Sensor TDS air', icon: 'opacity' },
+    { name: 'Penerima GPS NEO-6M', icon: 'gps_fixed' },
+    { name: 'Penerima GPS NEO-7M', icon: 'gps_fixed' },
+    { name: 'Potensiometer rotari', icon: 'rotate_right' },
+    { name: 'Rotary encoder KY-040', icon: 'rotate_right' },
+    { name: 'Motor servo SG90', icon: 'settings' },
+    { name: 'Motor servo MG996R', icon: 'settings' },
+    { name: 'Motor servo continuous', icon: 'settings' },
+    { name: 'Motor stepper NEMA 17', icon: 'precision_manufacturing' },
+    { name: 'Motor stepper 28BYJ-48', icon: 'precision_manufacturing' },
+    { name: 'Driver motor stepper A4988', icon: 'developer_board' },
+    { name: 'Driver motor stepper TB6600', icon: 'developer_board' },
+    { name: 'Motor DC 5V', icon: 'settings' },
+    { name: 'Motor DC coreless', icon: 'settings' },
+    { name: 'Motor gear box', icon: 'settings' },
+    { name: 'Driver motor DC L298N', icon: 'developer_board' },
+    { name: 'Driver motor DC L293D', icon: 'developer_board' },
+    { name: 'Driver motor BTS7960', icon: 'developer_board' },
+    { name: 'Aktuator linier elektrik', icon: 'height' },
+    { name: 'Solenoid pemukul', icon: 'eject' },
+    { name: 'Solenoid kunci pintu', icon: 'lock' },
+    { name: 'Katup solenoid air', icon: 'water_drop' },
+    { name: 'Silinder pneumatik kerja tunggal', icon: 'air' },
+    { name: 'Silinder pneumatik kerja ganda', icon: 'air' },
+    { name: 'Katup kontrol pneumatik', icon: 'air' },
+    { name: 'Kompresor udara mini', icon: 'air' },
+    { name: 'Pompa air DC mini', icon: 'water' },
+    { name: 'Pompa air peristaltik', icon: 'opacity' },
+    { name: 'Pompa diafragma 12V', icon: 'water' },
+    { name: 'Kipas pendingin DC', icon: 'mode_fan' },
+    { name: 'Modul relay 1-channel', icon: 'toggle_on' },
+    { name: 'Modul relay 4-channel', icon: 'toggle_on' },
+    { name: 'Solid state relay (SSR)', icon: 'power' },
+    { name: 'Buzzer piezoelektrik pasif', icon: 'volume_up' },
+    { name: 'Buzzer piezoelektrik aktif', icon: 'volume_up' },
+    { name: 'Speaker mini 8 ohm', icon: 'speaker' },
+    { name: 'Lampu LED diffuser', icon: 'lightbulb' },
+    { name: 'Lampu LED super bright', icon: 'lightbulb' },
+    { name: 'Strip LED addressable WS2812B', icon: 'wb_incandescent' },
+    { name: 'Strip LED RGB 5050', icon: 'palette' },
+    { name: 'Modul laser dioda', icon: 'flare' },
+    { name: 'Elemen pemanas (PTC)', icon: 'local_fire_department' },
+    { name: 'Pendingin peltier TEC1', icon: 'ac_unit' },
+    { name: 'Modul vibrasi koin', icon: 'vibration' },
+    { name: 'Layar LCD 16x2', icon: 'desktop_windows' },
+    { name: 'Layar LCD 20x4', icon: 'desktop_windows' },
+    { name: 'Layar OLED SSD1306', icon: 'tv' },
+    { name: 'Layar TFT ST7735', icon: 'tv' },
+    { name: 'Layar e-ink', icon: 'chrome_reader_mode' }
+  ];
+  const filteredSensors = newSensor.name ? predefinedSensors.filter(s => s.name.toLowerCase().includes(newSensor.name.toLowerCase())) : predefinedSensors;
+
+  let statusText = mesin?.status || 'OFFLINE';
+  let statusColor = statusText === 'Online' ? 'primary' : (statusText === 'MAINTENANCE' || statusText === 'FULL' ? 'error' : 'outline');
+  let capacity = mesin?.kapasitas || 0;
   
   useEffect(() => {
-    // Animation for progress circle
     const circumference = 2 * Math.PI * 90;
     const targetOffset = circumference * (1 - capacity / 100);
     const timer = setTimeout(() => {
@@ -43,6 +201,10 @@ export default function RvmDetailPage({ params }: { params: { id: string } }) {
     }, 300);
     return () => clearTimeout(timer);
   }, [capacity]);
+
+  if (loading && !mesin) {
+    return <div className="w-full flex items-center justify-center min-h-screen"><span className="material-symbols-outlined animate-spin text-4xl text-primary">progress_activity</span></div>;
+  }
 
   return (
     <div className="w-full flex flex-col min-h-screen relative bg-background text-on-surface font-body-md pb-10">
@@ -108,30 +270,30 @@ export default function RvmDetailPage({ params }: { params: { id: string } }) {
               <div className="flex items-center gap-4">
                 <h1 className="font-headline text-4xl font-bold text-primary">{id}</h1>
                 <span className={`inline-flex items-center gap-2 px-4 py-1.5 bg-${statusColor}/10 text-${statusColor} border border-${statusColor}/20 rounded-full font-label text-xs font-bold`}>
-                  <span className={`w-2 h-2 bg-${statusColor} rounded-full ${!isOffline ? 'status-pulse' : ''}`}></span>
+                  <span className={`w-2 h-2 bg-${statusColor} rounded-full ${statusText !== 'OFFLINE' ? 'status-pulse' : ''}`}></span>
                   {statusText}
                 </span>
               </div>
               <div className="flex items-center gap-2 text-on-surface-variant">
                 <span className="material-symbols-outlined text-xl">location_on</span>
-                <span className="text-sm font-medium">Fakultas Teknik, Universitas Indonesia</span>
+                <span className="text-sm font-medium">{mesin?.lokasi || "Lokasi tidak diketahui"}</span>
               </div>
             </div>
             
             <div className="flex flex-wrap gap-4">
               <button 
-                onClick={() => setLocalMaintenance(!localMaintenance)}
+                onClick={handleToggleMaintenance}
                 className={`flex items-center gap-2 px-8 py-2.5 rounded-xl transition-all duration-300 group ${
-                  localMaintenance 
+                  mesin?.status === 'MAINTENANCE' 
                     ? 'bg-primary text-on-primary shadow-[0_0_15px_rgba(78,222,163,0.3)] hover:scale-[1.02] active:scale-[0.98]' 
                     : 'bg-surface-container-highest text-on-surface border border-outline-variant/30 hover:bg-surface-container-high hover:scale-[1.02] active:scale-[0.98]'
                 }`}
               >
                 <span className="material-symbols-outlined text-[20px] transition-transform group-hover:rotate-180">
-                  {localMaintenance ? 'play_circle' : 'build'}
+                  {mesin?.status === 'MAINTENANCE' ? 'play_circle' : 'build'}
                 </span>
                 <span className="font-label text-xs font-bold uppercase tracking-wider">
-                  {localMaintenance ? 'Reactivate' : 'Maintenance'}
+                  {mesin?.status === 'MAINTENANCE' ? 'Reactivate' : 'Maintenance'}
                 </span>
               </button>
             </div>
@@ -162,31 +324,31 @@ export default function RvmDetailPage({ params }: { params: { id: string } }) {
                     <span className="font-label text-[10px] text-on-surface-variant uppercase mt-1">Ready</span>
                   </div>
                 </div>
-                <p className="text-xs text-on-surface-variant font-medium">{Math.floor(800 * capacity / 100)} / 800 bottles</p>
+                <p className="text-xs text-on-surface-variant font-medium">{Math.floor((mesin?.kapasitas_maks || 800) * capacity / 100)} / {mesin?.kapasitas_maks || 800} bottles</p>
               </div>
               
-              <div className="md:col-span-1 flex flex-col gap-6">
-                <div className="glass-card rounded-xl p-6 flex flex-col justify-between flex-1">
-                  <div className="flex items-center gap-3 text-on-surface-variant mb-2">
-                    <span className="material-symbols-outlined">humidity_percentage</span>
-                    <span className="font-label text-xs uppercase tracking-wider font-bold">Kelembapan</span>
+              <div className="md:col-span-1 flex flex-col gap-4">
+                <button onClick={() => setIsSensorModalOpen(true)} className="flex items-center justify-center gap-2 w-full py-2 border border-dashed border-primary/40 rounded-xl text-primary hover:bg-primary/5 transition-colors font-label font-medium">
+                  <span className="material-symbols-outlined text-lg">add</span>
+                  <span>Add Sensor</span>
+                </button>
+                {sensors.map((sensor, idx) => (
+                  <div key={idx} className="glass-card rounded-xl p-5 flex flex-col justify-between flex-1 relative min-h-[140px]">
+                    <button onClick={() => handleRemoveSensor(idx)} className="absolute top-3 right-3 text-on-surface-variant/40 hover:text-error transition-colors">
+                      <span className="material-symbols-outlined text-lg">delete</span>
+                    </button>
+                    <div className="flex items-center gap-3 text-on-surface-variant mb-2">
+                      <span className="material-symbols-outlined">{sensor.icon || 'sensors'}</span>
+                      <span className="font-label text-sm">{sensor.name}</span>
+                    </div>
+                    <div>
+                      <div className="font-headline text-primary text-2xl">
+                        {sensor.value}{sensor.dataType === 'Percentage' ? '%' : sensor.dataType === 'Celsius' ? '°C' : ''}
+                      </div>
+                      <div className="text-xs text-on-surface-variant font-label">{sensor.sensorType || 'Normal Status'}</div>
+                    </div>
                   </div>
-                  <div>
-                    <div className="font-headline text-primary text-3xl font-bold">92%</div>
-                    <div className="text-xs text-on-surface-variant mt-1 font-medium">Normal Pressure</div>
-                  </div>
-                </div>
-                
-                <div className="glass-card rounded-xl p-6 flex flex-col justify-between flex-1">
-                  <div className="flex items-center gap-3 text-on-surface-variant mb-2">
-                    <span className="material-symbols-outlined">thermostat</span>
-                    <span className="font-label text-xs uppercase tracking-wider font-bold">Internal Temp</span>
-                  </div>
-                  <div>
-                    <div className="font-headline text-primary text-3xl font-bold">24°C</div>
-                    <div className="text-xs text-on-surface-variant mt-1 font-medium">Optimal Range</div>
-                  </div>
-                </div>
+                ))}
               </div>
             </div>
 
@@ -285,6 +447,85 @@ export default function RvmDetailPage({ params }: { params: { id: string } }) {
           </div>
         </div>
       </div>
+
+      {/* Add Sensor Modal */}
+      {isSensorModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm" onClick={(e) => { if (e.target === e.currentTarget) setIsSensorModalOpen(false); }}>
+          <div className="glass-card w-full max-w-md p-6 rounded-2xl shadow-2xl border border-primary/20">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="font-headline text-xl text-primary font-bold">Add New Sensor</h3>
+              <button onClick={() => setIsSensorModalOpen(false)} className="text-on-surface-variant hover:text-primary transition-colors">
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-xs font-label text-on-surface-variant mb-1 uppercase">Sensor Icon</label>
+                <div className="grid grid-cols-8 gap-2 p-3 bg-surface-container-low/50 rounded-xl border border-outline-variant/10 max-h-32 overflow-y-auto">
+                  {['device_thermostat', 'humidity_percentage', 'co2', 'light_mode', 'settings_input_antenna', 'visibility', 'speed', 'water_drop', 'power', 'bolt', 'weight', 'compress', 'volume_up', 'vibration', 'memory', 'sensors', 'air', 'opacity', 'wb_sunny', 'thunderstorm', 'gas_meter', 'electric_meter', 'monitor_weight', 'science', 'explore', 'magnet', 'waves', 'water', 'palette', 'favorite', 'fingerprint', 'camera_alt', 'nfc', 'qr_code_scanner', 'developer_board', 'mic', 'screen_rotation', 'touch_app', 'gesture', 'gps_fixed', 'rotate_right', 'precision_manufacturing', 'height', 'eject', 'lock', 'mode_fan', 'toggle_on', 'speaker', 'lightbulb', 'wb_incandescent', 'flare', 'local_fire_department', 'ac_unit', 'tv', 'desktop_windows', 'chrome_reader_mode', 'directions_run'].map((ic) => (
+                    <button key={ic} onClick={() => setNewSensor({...newSensor, icon: ic})} type="button" className={`flex items-center justify-center p-2 rounded-lg transition-all text-on-surface-variant hover:bg-primary/20 hover:text-primary ${newSensor.icon === ic ? 'bg-primary/20 text-primary border border-primary/30' : ''}`}>
+                      <span className="material-symbols-outlined">{ic}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-label text-on-surface-variant mb-1 uppercase">Sensor Name</label>
+                <div className="relative group/suggestions">
+                  <input 
+                    value={newSensor.name} 
+                    onChange={e => setNewSensor({...newSensor, name: e.target.value})} 
+                    onFocus={() => setShowSuggestions(true)}
+                    onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                    className="w-full bg-surface-container-low border border-outline-variant/30 rounded-lg px-3 py-2 text-sm focus:border-primary outline-none transition-all" 
+                    placeholder="e.g. Optical Sensor A" type="text" 
+                  />
+                  
+                  {showSuggestions && (
+                    <div className="absolute z-50 left-0 right-0 mt-2 max-h-48 overflow-y-auto bg-surface-container shadow-2xl border border-outline-variant/20 rounded-xl origin-top">
+                      <div className="p-2 sticky top-0 text-[10px] font-label text-primary/60 uppercase tracking-widest border-b border-outline-variant/10 bg-surface-container-high/90 backdrop-blur-md">Suggestions</div>
+                      {filteredSensors.length > 0 ? filteredSensors.map((s, idx) => (
+                        <button key={idx} onClick={() => setNewSensor({...newSensor, name: s.name, icon: s.icon})} type="button" className="w-full text-left px-4 py-2 text-sm hover:bg-primary/10 hover:text-primary transition-colors flex items-center gap-2 border-b border-outline-variant/5">
+                          <span className="material-symbols-outlined text-sm">{s.icon}</span> {s.name}
+                        </button>
+                      )) : (
+                        <div className="px-4 py-3 text-xs text-on-surface-variant">Tidak ada sensor yang cocok.</div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-label text-on-surface-variant mb-1 uppercase">Data Type</label>
+                  <select value={newSensor.dataType} onChange={e => setNewSensor({...newSensor, dataType: e.target.value})} className="w-full bg-surface-container-low border border-outline-variant/30 rounded-lg px-3 py-2 text-sm focus:border-primary outline-none appearance-none">
+                    <option value="Percentage">Percentage</option>
+                    <option value="Celsius">Celsius</option>
+                    <option value="Binary">Binary</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-label text-on-surface-variant mb-1 uppercase">Sensor Type</label>
+                  <input value={newSensor.sensorType} onChange={e => setNewSensor({...newSensor, sensorType: e.target.value})} className="w-full bg-surface-container-low border border-outline-variant/30 rounded-lg px-3 py-2 text-sm focus:border-primary outline-none" placeholder="SHT4x" type="text" />
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-xs font-label text-on-surface-variant mb-1 uppercase">Barcode Code</label>
+                <input value={newSensor.barcode} onChange={e => setNewSensor({...newSensor, barcode: e.target.value})} className="w-full bg-surface-container-low border border-outline-variant/30 rounded-lg px-3 py-2 text-sm focus:border-primary outline-none" placeholder="BR-990-XXX" type="text" />
+              </div>
+              
+              <button disabled={savingSensor} onClick={handleAddSensorSubmit} className="w-full bg-primary text-on-primary py-3 rounded-xl font-label font-bold uppercase mt-2 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50">
+                {savingSensor ? 'Menyimpan...' : 'Create Sensor'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

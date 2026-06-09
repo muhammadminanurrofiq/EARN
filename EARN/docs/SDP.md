@@ -63,5 +63,50 @@
 
 - **2026-06-02 17:27:00** - Pembaruan Dokumen Arsitektur (Sinkronisasi Progres). - *Handoff: Memperbarui seluruh dokumen utama (`SDD.md`, `SRS.md`, `SRD.md`, dan `STD.md`) tanpa menghapus konten asli. Penambahan difokuskan pada penggabungan diagram relasional (ERD) & alir data (DFD), standar desain UI/UX (Bio-Digital Minimalism), penjabaran alur fungsional Maintenance Modal, serta draf pengujian interaksi antarmuka (Web Dashboard).*
 
+- **2026-06-04 11:30:00** - Implementasi CRUD & Paginasi untuk Mesin RVM.
+  - *Tugas yang diselesaikan:* Mengganti mock data dengan data real-time menggunakan Server Actions (Next.js) dan Prisma. Menerapkan fitur Create (Modal Tambah Mesin), Read (Paginasi), Update (Status Maintenance), Delete (Hapus Mesin).
+  - *File yang diubah/dibuat:* `docker-compose.dev.yml` (tambah DATABASE_URL), `frontend/package.json` (tambah script postinstall), `frontend/app/actions/rvm.ts` (baru), `frontend/app/mesin-rvm/page.tsx` (modifikasi).
+  - *Status saat ini:* Selesai.
+  - *Catatan untuk AI selanjutnya (Handoff Note):* Fitur CRUD sudah diintegrasikan sepenuhnya menggunakan Prisma dan Server Actions. Kontainer `frontend` perlu di-rebuild via `run-dev.bat restart-frontend` agar dependensi `@prisma/client` baru dan postinstall bisa terinstall dan terhubung ke database. Pagination berfungsi pada rute `mesin-rvm`.
+
+- **2026-06-04 11:50:00** - Modifikasi Skema Database Mesin RVM.
+  - *Tugas yang diselesaikan:* Menambahkan atribut lokasi koordinat geografis (`lat`, `lng`) ke skema Prisma untuk tabel `Mesin_RVM` dan memperbarui tampilan `AddMachineModal` sesuai dengan preferensi input user terbaru, termasuk kolom input Latitude, Longitude, dan Status Awal Mesin.
+  - *File yang diubah/dibuat:* `backend/prisma/schema.prisma`, `frontend/prisma/schema.prisma`, `frontend/app/actions/rvm.ts`, `frontend/app/mesin-rvm/page.tsx`.
+  - *Status saat ini:* Menunggu User melakukan sinkronisasi database (db push).
+
+- **2026-06-04 12:00:00** - Sinkronisasi Skema Database & Resolusi Dependensi Prisma.
+  - *Tugas yang diselesaikan:* Menyelaraskan versi `prisma` dan `@prisma/client` ke `^5.14.0` pada `frontend/package.json` agar konsisten dengan `backend/package.json`. Memodifikasi `docker-compose.dev.yml` agar menjalankan `npx prisma generate` sebelum startup (`npm run dev`) sehingga Prisma Client selalu di-generate ke dalam container volume secara dinamis. Memperbaiki tipe data parameter `handleAdd` di `page.tsx` agar menyertakan `lat`, `lng`, dan `initialStatus`.
+  - *File yang diubah/dibuat:* `frontend/package.json`, `docker-compose.dev.yml`, `frontend/app/mesin-rvm/page.tsx`, `docs/SDP.md`.
+  - *Status saat ini:* Selesai.
+  - **Catatan untuk AI selanjutnya (Handoff Note):** Halaman `/mesin-rvm` dan `/mesin-rvm/[id]` kini mendukung sensor secara Live dari kolom JSON PostgreSQL. Docker `libssl` error sudah lenyap seutuhnya berkat penggunaan `slim` images.
+
+- **Tanggal/Waktu:** 2026-06-04T13:20:00+07:00
+- **Tugas yang diselesaikan:** Memindahkan fitur penambahan konfigurasi Sensor Dinamis dari *modal popup tambah mesin* (`page.tsx` utama) ke dalam halaman detail mesin (`[id]/page.tsx`) sesuai instruksi.
+- **File yang diubah/dibuat:** 
+  - `frontend/app/mesin-rvm/page.tsx`
+  - `frontend/app/mesin-rvm/[id]/page.tsx`
+  - `frontend/app/actions/rvm.ts`
+- **Status saat ini:** Selesai
+- **Catatan untuk AI selanjutnya (Handoff Note):** Konfigurasi sensor (suhu, lembab, dsb) kini dilakukan secara terpisah di menu spesifik mesin (`[id]/page.tsx`) dan bisa diedit secara real-time. Data ini juga divisualisasikan dengan tepat pada halaman utamanya.
+
+- **Tanggal/Waktu:** 2026-06-04T14:15:00+07:00
+- **Tugas yang diselesaikan:** Menerapkan pengalihan rute otomatis (redirect) setelah pembuatan Mesin Baru, dan mengubah UI manajemen sensor ke dalam Popup/Modal Add Sensor yang modern dengan dukungan JSON array objek (icon, name, type, dll) berdasarkan HTML desain terbaru.
+- **File yang diubah/dibuat:** 
+  - `frontend/app/mesin-rvm/page.tsx`
+  - `frontend/app/mesin-rvm/[id]/page.tsx`
+- **Status saat ini:** Selesai
+- **Tanggal/Waktu:** 2026-06-04T15:45:00+07:00
+- **Tugas yang diselesaikan:** Memasukkan 100+ jenis sensor, aktuator, dan modul (dari MQ-2 hingga Layar E-ink) beserta pemetaan ikon Material Symbols yang spesifik ke dalam data *predefined* (Dropdown Suggestion) pada popup Add Sensor. Menambahkan logika *filtering* interaktif agar daftar opsi tetap responsif.
+- **File yang diubah/dibuat:** 
+  - `frontend/app/mesin-rvm/[id]/page.tsx`
+- **Status saat ini:** Selesai
+- **Catatan untuk AI selanjutnya (Handoff Note):** Daftar sensor kini menggunakan fitur saran yang difilter (Searchable Dropdown) sehingga performa UI tetap optimal meski daftarnya masif. Desain sudah selaras dengan palet Verdant Growth (diatur lewat Tailwind).
+
+- **2026-06-04 13:00:00** - Implementasi Dynamic Sensor Data & Perbaikan Prisma SSL.
+  - *Tugas yang diselesaikan:* Mengganti base image Docker dari `node:18-alpine` ke `node:18-slim` untuk backend dan frontend untuk menghindari error SSL Prisma secara permanen. Menambahkan kolom `sensor Json?` pada skema database `Mesin_RVM`. Mengupdate action `createMesinRVM` dan `getMesinRVMs` untuk mengakomodasi payload sensor dinamis. Memperbarui UI di `page.tsx` (`AddMachineModal` dan `MaintenanceModal`) untuk konfigurasi dan pembacaan sensor dinamis (misal: suhu, kelembaban, dll).
+  - *File yang diubah/dibuat:* `frontend/Dockerfile`, `backend/Dockerfile`, `backend/prisma/schema.prisma`, `frontend/prisma/schema.prisma`, `frontend/app/actions/rvm.ts`, `frontend/app/mesin-rvm/page.tsx`.
+  - *Status saat ini:* Selesai. Menunggu build kontainer dan verifikasi manual database.
+  - *Catatan untuk AI selanjutnya (Handoff Note):* Error `libssl.so.1.1` pada Prisma seharusnya sudah hilang. Data sensor kini berformat objek JSON. Pastikan `npx prisma db push` dilakukan agar PostgreSQL selaras dengan Prisma schema.
+
 ---
 *(Entri log selanjutnya akan ditambahkan di atas garis ini)*

@@ -1,7 +1,7 @@
-FROM node:18-alpine
+FROM node:18-slim
 
-# Install openssl for Prisma client and netcat (nc) for health checking
-RUN apk add --no-cache openssl libc6-compat
+# Install netcat and openssl for Prisma
+RUN apt-get update && apt-get install -y netcat-openbsd openssl && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 

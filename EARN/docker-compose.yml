@@ -80,6 +80,7 @@ services:
     environment:
       # Browser mengakses WebSocket Mosquitto via localhost (dari sudut pandang user)
       - NEXT_PUBLIC_MQTT_WS_URL=ws://localhost:9001
+      - DATABASE_URL=postgresql://earn_user:earn_password@db:5432/earn_db?schema=public
     depends_on:
       mosquitto:
         condition: service_started

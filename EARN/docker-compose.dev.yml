@@ -14,13 +14,14 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       target: builder
-    # Pada mode dev, kita jalankan "npm run dev"
-    command: npm run dev
+    # Pada mode dev, kita jalankan "npx prisma generate && npm run dev"
+    command: sh -c "npx prisma generate && npm run dev"
     volumes:
       - ./frontend:/app
       - /app/node_modules
       - /app/.next
     environment:
       - NEXT_PUBLIC_MQTT_WS_URL=ws://localhost:9001
+      - DATABASE_URL=postgresql://earn_user:earn_password@db:5432/earn_db?schema=public
       # WATCHPACK_POLLING=true memastikan hot-reloading Next.js bekerja di Windows dengan Docker volume mounts
       - WATCHPACK_POLLING=true
